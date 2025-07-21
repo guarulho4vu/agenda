@@ -10,6 +10,19 @@ h1 {
     color: white;
 }
 
+img {
+    position: absolute;
+    top: 0;
+}
+
+#img1 {
+    left: 0;
+}
+
+#img2 {
+    right: 0;
+}
+
 .vermelho {
     color: red;
 }
@@ -39,19 +52,19 @@ h1 {
 }
 
 .flex {
-  display: flex; 
-  align-items: center;
-  gap: 10px;
+    display: flex; 
+    align-items: center;
+    gap: 10px;
 }
 
 .flex h3 {
-  flex-shrink: 0;
+    flex-shrink: 0;
 }
 
 .flex input, select {
-  flex-grow: 1;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+    flex-grow: 1;
+    border: 1px solid #ddd;
+    border-radius: 4px;
 }
 
 @media (max-width: 1400px) {
@@ -75,8 +88,8 @@ input, select {
 }
 
 #limparFiltro {
-    height: 50px;   /* Altura fixa */
-    padding: 10px 20px; /* Adiciona um pouco de espaçamento interno para o texto */
+    height: 50px; 
+    padding: 10px 20px;
     font-size: 16px;
 }
 
@@ -91,18 +104,21 @@ input, select {
     .dados-banco {
         font-size: 75%;
     }
+    img {
+        display: none;
+    }
 }
 
 .dados-banco th, .dados-banco td {
-  border: 1px solid #ddd;
-  padding: 10px;
-  text-align: left;
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
 }
 
 .dados-banco th {
-  background-color: #fcab94;
-  color: #333;
-  font-weight: bold;
+    background-color: #fcab94;
+    color: #333;
+    font-weight: bold;
 }
 
  .dados-banco tbody tr {
@@ -110,9 +126,9 @@ input, select {
  } 
 
 .dados-banco tbody tr:nth-child(even) {
-  background-color: #ffe3db;
+    background-color: #ffe3db;
 }
 
 .dados-banco tbody tr:hover, .entrada:hover {
-  filter: grayscale(45%);
+    filter: grayscale(45%);
 }

@@ -140,9 +140,7 @@ async function loadAndDisplayTarefas(filtroResponsavel = 'todos', termoBuscaGera
             filtroResponsavelSelect.appendChild(option);
         });
 
-        if (filtroResponsavel !== 'todos') {
-            tarefas = tarefas.filter(tarefa => tarefa.responsavel === filtroResponsavel);
-        }
+        if (filtroResponsavel !== 'todos') tarefas = tarefas.filter(tarefa => tarefa.responsavel === filtroResponsavel);
 
         if (termoBuscaGeral) {
             const termoLower = termoBuscaGeral.toLowerCase();

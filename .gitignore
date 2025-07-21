@@ -1,0 +1,41 @@
+# Ignorar dependências do Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+.pnp.js
+.pnp.cjs
+
+# Ignorar arquivos de cache e build
+build/
+dist/
+tmp/
+*.log
+
+# Ignorar arquivos de configuração de ambiente (senhas, chaves, etc.)
+.env
+.env.*
+config/local.js # Se você usa configurações locais separadas
+banco.db # Ignorar o seu arquivo de banco de dados SQLite
+*.sqlite-journal # Arquivos de journal do SQLite
+
+# Ignorar arquivos específicos do sistema operacional
+.DS_Store # macOS
+Thumbs.db # Windows
+
+# Ignorar arquivos de IDEs populares
+.vscode/ # VS Code
+.idea/ # IntelliJ / WebStorm / PhpStorm
+*.sublime-project
+*.sublime-workspace
+
+# Ignorar arquivos de teste (se você tiver relatórios de cobertura, por exemplo)
+coverage/
+
+# Ignorar arquivos gerados por ferramentas de controle de versão (além do próprio .git)
+.gitattributes
+.gitkeep
+
+# Arquivos de package manager específicos (opcional, se você não quiser versionar os locks)
+package-lock.json
+yarn.lock

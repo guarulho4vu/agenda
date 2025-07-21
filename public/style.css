@@ -1,0 +1,118 @@
+body {
+    text-align: center;
+    background-color: #fe8260;
+    font-family: "Playwrite VN Guides", cursive;
+    font-weight: 400;
+    font-style: normal;
+}
+
+h1 {
+    color: white;
+}
+
+.vermelho {
+    color: red;
+}
+
+.amarelo {
+    color: #7e7e1d;
+}
+
+#main {
+    background-color: white;
+    border: 2px solid #333;
+    border-radius: 20px;
+}
+
+.separacao {
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    max-width: 1500px;
+    margin: 20px auto;
+}
+
+.entrada {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 20px;
+    padding: 20px;
+}
+
+.flex {
+  display: flex; 
+  align-items: center;
+  gap: 10px;
+}
+
+.flex h3 {
+  flex-shrink: 0;
+}
+
+.flex input, select {
+  flex-grow: 1;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+@media (max-width: 1400px) {
+    .separacao {
+        width: 95%;
+    }
+}
+
+input, select {
+    padding: 15px 15px;
+}
+
+#submit, #limparFiltro {
+    background-color: #fe8260;
+    border: none;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
+
+#limparFiltro {
+    height: 50px;   /* Altura fixa */
+    padding: 10px 20px; /* Adiciona um pouco de espaçamento interno para o texto */
+    font-size: 16px;
+}
+
+.dados-banco {
+    width: 100%; 
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-family: Arial, sans-serif;
+}
+
+@media (max-width: 620px) {
+    .dados-banco {
+        font-size: 75%;
+    }
+}
+
+.dados-banco th, .dados-banco td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.dados-banco th {
+  background-color: #fcab94;
+  color: #333;
+  font-weight: bold;
+}
+
+ .dados-banco tbody tr {
+    background-color: #f7c6b9;
+ } 
+
+.dados-banco tbody tr:nth-child(even) {
+  background-color: #ffe3db;
+}
+
+.dados-banco tbody tr:hover, .entrada:hover {
+  filter: grayscale(45%);
+}

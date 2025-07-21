@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Agenda Água Legal</title>
+        <link rel="stylesheet" href="style.css"> </head>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Playwrite+VN+Guides&display=swap" rel="stylesheet">
+    </head>
+
+    <body>
+        <h1>Agenda Água Legal</h1>
+        <div id="main">
+            <div class="separacao">
+                <h2>Adicionar nova tarefa</h3>
+                <form action="" id="formulario" class="entrada">
+                    <div class="flex">
+                        <h3>Tarefa:</h3>
+                        <input type="text" id="acao" placeholder="Ação" required/>
+                    </div>
+                    
+                    <div class="flex">
+                        <h3>Responsável:</h3>
+                        <input type="text" id="responsavel" placeholder="Funcionário" required/>
+                    </div>
+                    
+                    <div class="flex">
+                        <h3>Prioridade:</h3>
+                        <select name="urgencia" id="urgencia"> 
+                            <option value="Baixa" class="opcao">Baixa</option>
+                            <option value="Media" class="opcao">Média</option>
+                            <option value="Alta" class="opcao">Alta</option>
+                        </select>
+                    </div>
+
+                    <div class="flex">
+                        <h3>Data de entrega:</h3>
+                        <input type="date" id="data" required/>
+                    </div>
+
+                    <div class="flex">
+                        <h3>Hora da entrega:</h3>
+                        <input type="time" id="hora" required/>
+                    </div>
+
+                    <input type="submit" id="submit">
+                </form>
+            </div>
+            
+            <div class="separacao">
+                <div class="entrada">
+                    <h2>Filtrar Tarefas:</h2>
+                    <div class="flex">
+                        <h3>Responsável:</h3>
+                        <select id="filtroResponsavel"><option value="todos">Todos os Responsáveis</option></select>
+                    </div>
+                    
+                    <div class="flex">
+                        <h3>Geral:</h3>
+                        <input type="text" id="filtroGeral" placeholder="Filtrar por Ação, Responsável, Prioridade, Data ou Hora">
+                    </div>
+
+                    <button id="limparFiltro">Limpar Filtros</button>
+                </div>
+            </div>
+
+            <div class="separacao">
+                <h2>Tarefas em andamento</h2>
+                <table class="dados-banco">
+                    <thead>
+                        <tr>
+                            <th>Tarefa</th>
+                            <th>Responsável</th>
+                            <th>Prioridade</th>
+                            <th>Dia</th>
+                            <th>Hora</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="andamento"></tbody>
+                </table>
+            </div>
+
+            <div class="separacao">
+                <h2>Tarefas Concluidas</h2>
+                <table class="dados-banco">
+                <thead>
+                    <tr>
+                        <th>Tarefa</th>
+                        <th>Responsável</th>
+                        <th>Prioridade</th>
+                        <th>Status</th>
+                        <th>Ações</th> 
+                    </tr>
+                </thead>
+                <tbody id="concluido"></tbody>
+            </div>
+        </div>
+        <script src="script.js"></script>
+    </body>
+</html>

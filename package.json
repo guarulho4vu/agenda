@@ -1,0 +1,22 @@
+{
+  "name": "agenda",
+  "version": "1.0.0",
+  "description": "agenda para Agua Legal",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "agenda"
+  ],
+  "author": "Tiago da Silva Siqueira",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "path": "^0.12.7",
+    "sqlite3": "^5.1.7",
+    "url": "^0.11.4"
+  },
+  "type": "module"
+}

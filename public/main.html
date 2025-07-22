@@ -17,15 +17,20 @@
         <div id="main">
             <div class="separacao">
                 <h2>Adicionar nova tarefa</h3>
-                <form action="" id="formulario" class="entrada">
+                <form action="" id="formularioTarefa" class="entrada">
                     <div class="flex">
                         <h3>Tarefa:</h3>
                         <input type="text" id="acao" placeholder="Ação" required/>
                     </div>
-                    
+                    <!--
                     <div class="flex">
                         <h3>Responsável:</h3>
                         <input type="text" id="responsavel" placeholder="Funcionário" required/>
+                    </div>
+                    -->
+                    <div class="flex">
+                        <h3>Responsável:</h3>
+                        <select id="responsavel"><option value="todos">Todos os Responsáveis</option></select>
                     </div>
                     
                     <div class="flex">
@@ -47,7 +52,24 @@
                         <input type="time" id="hora" required/>
                     </div>
 
-                    <input type="submit" id="submit">
+                    <input type="submit" id="submitTarefa" class="submit">
+                </form>
+            </div>
+
+            <div class="separacao">
+                <h2>Adicionar Funcionário</h3>
+                <form action="" id="formularioFuncionario" class="entrada">
+                    <div class="flex">
+                        <h3>Nome:</h3>
+                        <input type="text" id="nome" placeholder="Funcionário" required/>
+                    </div>
+
+                    <div class="flex">
+                        <h3>Email:</h3>
+                        <input type="email" id="email" placeholder="funcionario@gmail.com" required/>
+                    </div>
+                    
+                    <input type="submit" id="submitFuncionario" class="submit">
                 </form>
             </div>
             
@@ -79,7 +101,8 @@
                             <th>Prioridade</th>
                             <th>Dia</th>
                             <th>Hora</th>
-                            <th>Ações</th>
+                            <th>Concluir</th>
+                            <th>Avisar</th>
                         </tr>
                     </thead>
                     <tbody id="andamento"></tbody>

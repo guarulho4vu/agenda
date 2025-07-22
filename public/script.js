@@ -1,16 +1,16 @@
-async function adicionarTarefaAPI(novaTarefa) {
+async function adicionarAPI(novaTarefa, tipo) {
     try {
-        const response = await fetch('http://localhost:3000/api/tarefas', {
+        const response = await fetch('http://localhost:3000/api/' + tipo, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(novaTarefa)
         });
 
         const result = await response.json();
-        if (!response.ok) throw new Error(result.error || 'Erro desconhecido ao adicionar rota.');
+        if (!response.ok) throw new Error(result.error || 'Erro desconhecido ao adicionar');
         return result; // Pode conter o ID da nova rota
     } catch (error) {
-        console.error('Erro ao adicionar rota na API:', error.message);
+        console.error('Erro ao adicionar na API:', error.message);
         throw error;
     }
 }
@@ -44,6 +44,24 @@ async function deletarTarefaAPI(id) {
     }
 }
 
+async function conseguindoEmail(nome) {
+    try {
+        const response = await fetch(`http://localhost:3000/api/funcionarios/email/${encodeURIComponent(nome)}`); // encodeURIComponent é importante para nomes com espaços ou caracteres especiais
+        if (!response.ok) {
+            if (response.status === 404) {
+                console.warn(`Funcionário com nome "${nome}" não encontrado.`);
+                return null;
+            }
+            throw new Error(`Erro HTTP! status: ${response.status}`);
+        }
+        const data = await response.json();
+        return data.email;
+    } catch (error) {
+        console.error('Erro ao buscar email do funcionário:', error.message);
+        return null;
+    }
+}
+
 async function addTarefa() {
     const novaTarefa = {
         acao : document.getElementById('acao').value,
@@ -60,10 +78,31 @@ async function addTarefa() {
     }
     
     try {
-        await adicionarTarefaAPI(novaTarefa);
-        document.getElementById('formulario').reset();
+        await adicionarAPI(novaTarefa, 'tarefas');
+        document.getElementById('formularioTarefa').reset();
         alert('Tarefa adicionada com sucesso!');
         await loadAndDisplayTarefas();
+    } catch (error) {
+        alert('Erro ao adicionar tarefa: ' + error.message);
+    }
+}
+
+async function addFuncionario() {
+    const novoFuncionario = {
+        nome: document.getElementById('nome').value, 
+        email: document.getElementById('email').value
+    }
+
+    if (!novoFuncionario.nome || !novoFuncionario.email) {
+        console.log('Campos obrigatórios ausentes.');
+        return;
+    }
+    
+    try {
+        await adicionarAPI(novoFuncionario, 'funcionarios');
+        await loadAndDisplayTarefas();
+        document.getElementById('formularioFuncionario').reset();
+        alert('Funcionario adicionado com sucesso!');
     } catch (error) {
         alert('Erro ao adicionar tarefa: ' + error.message);
     }
@@ -115,6 +154,41 @@ async function deletarTarefa(id) {
         } catch (error) {
             console.log('Erro ao excluir tarefa: ' + error.message);
         }
+    }
+}
+
+async function mandarEmail(funcionario) {
+    const email = await conseguindoEmail(funcionario);
+    console.log(email);
+}
+
+async function loadFuncionariosIntoSelect() {
+    try {
+        const response = await fetch('http://localhost:3000/api/funcionarios');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        const funcionarios = data.funcionarios;
+
+        const responsavelSelect = document.getElementById('responsavel');
+        responsavelSelect.innerHTML = ''; // Limpa as opções existentes
+
+        // Adiciona uma opção padrão (opcional)
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Selecione um funcionário';
+        defaultOption.disabled = true; // Impede que seja selecionado
+        defaultOption.selected = true; // Torna-o a opção selecionada por padrão
+        responsavelSelect.appendChild(defaultOption);
+
+        funcionarios.forEach(func => {
+            const option = document.createElement('option');
+            option.value = func.nome; // Ou func.ID se você preferir salvar o ID no banco
+            option.textContent = func.nome;
+            responsavelSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Erro ao carregar funcionários:', error.message);
+        // alert('Erro ao carregar funcionários para seleção.');
     }
 }
 
@@ -181,12 +255,19 @@ async function loadAndDisplayTarefas(filtroResponsavel = 'todos', termoBuscaGera
             if (atraso.dias > 0 || atraso.horas >= 0 || atraso.minutos >= 0) row.classList.add("vermelho");
             else if (atraso.dias == -1) row.classList.add("amarelo");
 
-            const actionCell = row.insertCell();
-            const completeButton = document.createElement('button');
-            completeButton.textContent = 'Concluir';
-            completeButton.classList.add('complete-btn');
-            completeButton.onclick = () => {atualizarTarefa(tarefa.ID, tarefa.data, tarefa.hora)};
-            actionCell.appendChild(completeButton);
+            const conclusao = row.insertCell();
+            const btnConclusao = document.createElement('button');
+            btnConclusao.textContent = 'Concluir';
+            btnConclusao.classList.add('complete-btn');
+            btnConclusao.onclick = () => {atualizarTarefa(tarefa.ID, tarefa.data, tarefa.hora)};
+            conclusao.appendChild(btnConclusao);
+
+            const aviso = row.insertCell();
+            const btnAviso = document.createElement('button');
+            btnAviso.textContent = 'Avisar';
+            //btnAviso.classList.add('complete-btn');
+            btnAviso.onclick = () => {mandarEmail(tarefa.responsavel)};
+            aviso.appendChild(btnAviso);
         });
 
         concluidas.forEach(tarefa => {
@@ -210,6 +291,7 @@ async function loadAndDisplayTarefas(filtroResponsavel = 'todos', termoBuscaGera
 
 document.addEventListener('DOMContentLoaded', async function() {
     await loadAndDisplayTarefas();
+    await loadFuncionariosIntoSelect();
 
     // Event listener para o filtro de responsável
     const filtroResponsavelSelect = document.getElementById('filtroResponsavel');
@@ -235,8 +317,13 @@ document.addEventListener('DOMContentLoaded', async function() {
         loadAndDisplayTarefas('todos', '');
     });
 
-    document.getElementById('formulario').addEventListener('submit', function(e) {
+    document.getElementById('formularioTarefa').addEventListener('submit', function(e) {
         e.preventDefault();
         addTarefa();
+    });
+
+    document.getElementById('formularioFuncionario').addEventListener('submit', function(e) {
+        e.preventDefault();
+        addFuncionario();
     });
 });

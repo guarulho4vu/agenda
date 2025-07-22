@@ -77,7 +77,7 @@ input, select {
     padding: 15px 15px;
 }
 
-#submit, #limparFiltro {
+.submit, #limparFiltro {
     background-color: #fe8260;
     border: none;
     color: white;

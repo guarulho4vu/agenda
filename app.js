@@ -28,16 +28,19 @@ const db = new sqlite3.Database('./public/banco.db', sqlite3.OPEN_READWRITE | sq
             if (createErr) console.error('Erro ao criar tabela tarefas:', createErr.message);
             else console.log('Tabela "tarefas" verificada/criada.');
         });
+
+        db.run(`CREATE TABLE IF NOT EXISTS funcionarios (
+            ID INTEGER PRIMARY KEY AUTOINCREMENT, nome TEXT, email TEXT)`, (createErr) => {
+                if (createErr) console.error('Erro ao criar tabela funcionarios:', createErr.message);
+                else console.log('Tabela "funcionarios" verificada/criada.');
+            }
+        );
     }
 });
 
 app.use(express.json());
 
 app.use(express.static(path.join(__dirname, 'public')));
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'main.html'));
-});
 
 app.get('/api/tarefas', (req, res) => {
     db.all('SELECT *, ID AS ID FROM tarefas', [], (err, rows) => {
@@ -46,6 +49,31 @@ app.get('/api/tarefas', (req, res) => {
             return;
         }
         res.json({ tarefas: rows });
+    });
+});
+
+app.get('/api/funcionarios', (req, res) => {
+    db.all('SELECT *, ID AS ID FROM funcionarios', [], (err, rows) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.json({ funcionarios : rows });
+    });
+});
+
+// Dentro do seu app.js, adicione esta nova rota GET
+app.get('/api/funcionarios/email/:nome', (req, res) => {
+    const nomeFuncionario = req.params.nome;
+
+    db.get('SELECT email FROM funcionarios WHERE nome = ?', [nomeFuncionario], (err, row) => {
+        if (err) {
+            console.error('Erro ao buscar email do funcionário no DB:', err.message);
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        if (row) res.json({ email: row.email });
+        else res.status(404).json({ message: 'Funcionário não encontrado.' });
     });
 });
 
@@ -62,6 +90,26 @@ app.post('/api/tarefas', (req, res) => {
     db.run(sql, [acao, responsavel, urgencia, data, hora, status], function(err) {
         if (err) {
             console.error('ERRO ao adicionar tarefa no DB:', err.message, 'Dados:', req.body);
+            res.status(500).json({ error: err.message });
+            return;
+        }
+        res.status(201).json({ message: 'Tarefa adicionada com sucesso!', id: this.lastID });
+    });
+});
+
+app.post('/api/funcionarios', (req, res) => {
+    const {nome, email} = req.body;
+
+    if (!nome || !email) {
+        console.warn('Requisição com campos obrigatórios ausentes:', req.body);
+        return res.status(400).json({ error: 'Campos obrigatórios (nome, email) ausentes.' });
+    }
+
+    const sql = `INSERT INTO funcionarios (nome, email) VALUES (?, ?)`;
+
+    db.run(sql, [nome, email], function(err) {
+        if (err) {
+            console.error('ERRO ao adicionar funcionarios no DB:', err.message, 'Dados:', req.body);
             res.status(500).json({ error: err.message });
             return;
         }
@@ -97,6 +145,10 @@ app.delete('/api/tarefas/:id', (req, res) => {
         if (this.changes === 0) res.status(404).json({ message: 'Rota não encontrada.' });
         else res.json({ message: 'Rota excluída com sucesso!' });
     });
+});
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'main.html'));
 });
 
 app.listen(port, () => {

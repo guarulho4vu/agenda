@@ -62,6 +62,23 @@ async function conseguindoEmail(nome) {
     }
 }
 
+async function mandarEmail(funcionario, assunto, corpo) {
+    const destinatario = await conseguindoEmail(funcionario);
+    //const assunto = 'teste';
+    //const corpo = "testando essa bagaça do krl";
+    console.log(email);
+    try {
+        const resposta = await fetch('/enviar-email', { // Seu endpoint da API de backend
+            method: 'POST', headers: {'Content-Type': 'application/json',}, body: JSON.stringify({ destinatario, assunto, corpo }),
+        });
+        const dados = await resposta.json();
+        alert(resposta.ok ? 'E-mail enviado com sucesso!' : `Erro ao enviar e-mail: ${dados.message}`)
+    } catch (error) {
+        console.error('Erro de rede:', error);
+        alert('Não foi possível conectar ao servidor.');
+    }
+}
+
 async function addTarefa() {
     const novaTarefa = {
         acao : document.getElementById('acao').value,
@@ -80,8 +97,9 @@ async function addTarefa() {
     try {
         await adicionarAPI(novaTarefa, 'tarefas');
         document.getElementById('formularioTarefa').reset();
-        alert('Tarefa adicionada com sucesso!');
         await loadAndDisplayTarefas();
+        await mandarEmail(novaTarefa.responsavel, "Nova Tarefa", "Você tem uma nova tarefa: " + novaTarefa.acao + ", para ser entregue " + novaTarefa.data + " as " + novaTarefa.hora + " horas.");
+        alert('Tarefa adicionada com sucesso!');
     } catch (error) {
         alert('Erro ao adicionar tarefa: ' + error.message);
     }
@@ -155,11 +173,6 @@ async function deletarTarefa(id) {
             console.log('Erro ao excluir tarefa: ' + error.message);
         }
     }
-}
-
-async function mandarEmail(funcionario) {
-    const email = await conseguindoEmail(funcionario);
-    console.log(email);
 }
 
 async function loadFuncionariosIntoSelect() {

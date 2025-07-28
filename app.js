@@ -2,6 +2,8 @@ import sqlite3 from "sqlite3";
 import express from "express";
 import cors from 'cors';
 import path from "path";
+import nodemailer from 'nodemailer';
+import bodyParser from 'body-parser'
 import { fileURLToPath } from 'url';
 
 const app = express();
@@ -10,6 +12,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 app.use(cors());
+
+const transportador = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {user: '', pass: '',}, // Substituir
+});
 
 const db = new sqlite3.Database('./public/banco.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
     if (err) {
@@ -145,6 +152,23 @@ app.delete('/api/tarefas/:id', (req, res) => {
         if (this.changes === 0) res.status(404).json({ message: 'Rota não encontrada.' });
         else res.json({ message: 'Rota excluída com sucesso!' });
     });
+});
+
+app.post('/enviar-email', async (req, res) => {
+    const { destinatario, assunto, corpo } = req.body;
+
+    if (!destinatario || !assunto || !corpo) return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
+
+    const opcoesDeEmail = {from: '', to: destinatario, subject: assunto, text: corpo,};
+
+    try {
+        await transportador.sendMail(opcoesDeEmail);
+        console.log('E-mail enviado com sucesso!')
+        res.status(200).json({ message: 'E-mail enviado com sucesso!' });
+    } catch (error) {
+        console.log('Erro ao enviar e-mail:', error);
+        res.status(500).json({ message: 'Falha ao enviar e-mail.', error: error.message });
+    }
 });
 
 app.get('/', (req, res) => {

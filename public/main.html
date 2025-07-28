@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Agenda Água Legal</title>
-        <link rel="stylesheet" href="style.css"> </head>
+        <link rel="stylesheet" href="style.css?v=20250723"> </head>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Playwrite+VN+Guides&display=swap" rel="stylesheet">
@@ -19,23 +19,18 @@
                 <h2>Adicionar nova tarefa</h3>
                 <form action="" id="formularioTarefa" class="entrada">
                     <div class="flex">
-                        <h3>Tarefa:</h3>
+                        <label for="text">Tarefa:</label>
                         <input type="text" id="acao" placeholder="Ação" required/>
                     </div>
-                    <!--
+
                     <div class="flex">
-                        <h3>Responsável:</h3>
-                        <input type="text" id="responsavel" placeholder="Funcionário" required/>
-                    </div>
-                    -->
-                    <div class="flex">
-                        <h3>Responsável:</h3>
-                        <select id="responsavel"><option value="todos">Todos os Responsáveis</option></select>
+                        <label for="responsavel">Responsável:</label>
+                        <select id="responsavel" title="Selecione o responsável pela tarefa"><option value="todos" >Todos os Responsáveis</option></select>
                     </div>
                     
                     <div class="flex">
-                        <h3>Prioridade:</h3>
-                        <select name="urgencia" id="urgencia"> 
+                        <label for="urgencia">Prioridade:</label>
+                        <select name="urgencia" id="urgencia" title="Selecione a prioridade da tarefa> 
                             <option value="Baixa" class="opcao">Baixa</option>
                             <option value="Media" class="opcao">Média</option>
                             <option value="Alta" class="opcao">Alta</option>
@@ -43,12 +38,12 @@
                     </div>
 
                     <div class="flex">
-                        <h3>Data de entrega:</h3>
+                        <label for="data">Data de entrega:</label>
                         <input type="date" id="data" required/>
                     </div>
 
                     <div class="flex">
-                        <h3>Hora da entrega:</h3>
+                        <label for="hora">Hora da entrega:</label>
                         <input type="time" id="hora" required/>
                     </div>
 
@@ -60,12 +55,12 @@
                 <h2>Adicionar Funcionário</h3>
                 <form action="" id="formularioFuncionario" class="entrada">
                     <div class="flex">
-                        <h3>Nome:</h3>
+                        <label for="nome">Nome:</label>
                         <input type="text" id="nome" placeholder="Funcionário" required/>
                     </div>
 
                     <div class="flex">
-                        <h3>Email:</h3>
+                        <label for="email">Email:</label>
                         <input type="email" id="email" placeholder="funcionario@gmail.com" required/>
                     </div>
                     
@@ -77,12 +72,12 @@
                 <div class="entrada">
                     <h2>Filtrar Tarefas:</h2>
                     <div class="flex">
-                        <h3>Responsável:</h3>
-                        <select id="filtroResponsavel"><option value="todos">Todos os Responsáveis</option></select>
+                        <label for="filtroResponsavel">Responsável:</label>
+                        <select id="filtroResponsavel" title="Filtrar por responsável"><option value="todos">Todos os Responsáveis</option></select>
                     </div>
                     
                     <div class="flex">
-                        <h3>Geral:</h3>
+                        <label for="filtroGeral">Geral:</label>
                         <input type="text" id="filtroGeral" placeholder="Filtrar por Ação, Responsável, Prioridade, Data ou Hora">
                     </div>
 
@@ -92,7 +87,7 @@
 
             <div class="separacao">
                 <h2>Tarefas em andamento</h2>
-                <p>Glossário:⚫-Normal, 🟡-Próximo ao vencimento, 🔴-Atrasado</p>
+                <label for="dados-banco">Glossário:⚫-Normal, 🟡-Próximo ao vencimento, 🔴-Atrasado</label>
                 <table class="dados-banco">
                     <thead>
                         <tr>
@@ -124,6 +119,6 @@
                 <tbody id="concluido"></tbody>
             </div>
         </div>
-        <script src="script.js"></script>
+        <script src="script.js?v=20250723"></script>
     </body>
 </html>

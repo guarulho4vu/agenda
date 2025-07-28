@@ -12,15 +12,22 @@
 
     <body>
         <h1>Agenda Água Legal</h1>
+
         <img src="./img/agenda.png" alt="agenda" width="120px" height="120px" id="img1"/>
         <img src="./img/agenda.png" alt="agenda" width="120px" height="120px" id="img2"/>
+        
+        <div id="myToast" class="toast-container">
+            <div class="toast-title" id="toastTitle"></div>
+            <div class="toast-message" id="toastMessage"></div>
+        </div>
+
         <div id="main">
             <div class="separacao">
                 <h2>Adicionar nova tarefa</h3>
                 <form action="" id="formularioTarefa" class="entrada">
                     <div class="flex">
-                        <label for="text">Tarefa:</label>
-                        <input type="text" id="acao" placeholder="Ação" required/>
+                        <label for="acao">Tarefa:</label>
+                        <input type="text" id="acao" placeholder="Ação" required autocomplete="off"/>
                     </div>
 
                     <div class="flex">
@@ -30,7 +37,7 @@
                     
                     <div class="flex">
                         <label for="urgencia">Prioridade:</label>
-                        <select name="urgencia" id="urgencia" title="Selecione a prioridade da tarefa> 
+                        <select name="prioridade" id="urgencia" title="Selecione a prioridade da tarefa"> 
                             <option value="Baixa" class="opcao">Baixa</option>
                             <option value="Media" class="opcao">Média</option>
                             <option value="Alta" class="opcao">Alta</option>
@@ -60,8 +67,8 @@
                     </div>
 
                     <div class="flex">
-                        <label for="email">Email:</label>
-                        <input type="email" id="email" placeholder="funcionario@gmail.com" required/>
+                        <label for="email" autocomplete="name">Email:</label>
+                        <input type="email" id="email" placeholder="funcionario@gmail.com" required autocomplete="email"/>
                     </div>
                     
                     <input type="submit" id="submitFuncionario" class="submit">
@@ -87,7 +94,7 @@
 
             <div class="separacao">
                 <h2>Tarefas em andamento</h2>
-                <label for="dados-banco">Glossário:⚫-Normal, 🟡-Próximo ao vencimento, 🔴-Atrasado</label>
+                <p>Glossário:⚫-Normal, 🟡-Próximo ao vencimento, 🔴-Atrasado</p>
                 <table class="dados-banco">
                     <thead>
                         <tr>

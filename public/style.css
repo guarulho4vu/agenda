@@ -132,3 +132,39 @@ input, select {
 .dados-banco tbody tr:hover, .entrada:hover {
     filter: grayscale(45%);
 }
+
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: -350px;
+    width: 300px; 
+    background-color: #4c7faf; 
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: right 0.8s ease-in-out;
+    z-index: 1000;
+    font-family: '';
+}
+
+.toast-container.show {
+    right: 20px;
+}
+
+.toast-container.hide {
+    right: -350px;
+}
+
+.toast-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.toast-message {
+    font-size: 0.9em;
+}
+
+.fundo-vermelho {
+    background-color: red;
+}

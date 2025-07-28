@@ -47,7 +47,13 @@ const db = new sqlite3.Database('./public/banco.db', sqlite3.OPEN_READWRITE | sq
 
 app.use(express.json());
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+    maxAge: '1h', 
+    setHeaders: function (res, path, stat) {
+        res.removeHeader('X-XSS-Protection');
+        res.removeHeader('X-Frame-Options');
+    }
+}));
 
 app.get('/api/tarefas', (req, res) => {
     db.all('SELECT *, ID AS ID FROM tarefas', [], (err, rows) => {
@@ -104,6 +110,7 @@ app.post('/api/tarefas', (req, res) => {
     });
 });
 
+// app.js
 app.post('/api/funcionarios', (req, res) => {
     const {nome, email} = req.body;
 
@@ -112,15 +119,28 @@ app.post('/api/funcionarios', (req, res) => {
         return res.status(400).json({ error: 'Campos obrigatórios (nome, email) ausentes.' });
     }
 
-    const sql = `INSERT INTO funcionarios (nome, email) VALUES (?, ?)`;
-
-    db.run(sql, [nome, email], function(err) {
+    //Verifique se o email já existe
+    db.get('SELECT COUNT(*) AS count FROM funcionarios WHERE email = ?', [email], (err, row) => {
         if (err) {
-            console.error('ERRO ao adicionar funcionarios no DB:', err.message, 'Dados:', req.body);
-            res.status(500).json({ error: err.message });
-            return;
+            console.error('ERRO ao verificar email de funcionário no DB:', err.message);
+            return res.status(500).json({ error: err.message });
         }
-        res.status(201).json({ message: 'Tarefa adicionada com sucesso!', id: this.lastID });
+
+        if (row.count > 0) { // Email já existe, retorne um erro 409 Conflict
+            return res.status(409).json({ error: 'Já existe um funcionário cadastrado com este e-mail.' });
+        }
+
+        // Se o email não existe, proceda com a inserção
+        const sql = `INSERT INTO funcionarios (nome, email) VALUES (?, ?)`;
+
+        db.run(sql, [nome, email], function(err) {
+            if (err) {
+                console.error('ERRO ao adicionar funcionarios no DB:', err.message, 'Dados:', req.body);
+                res.status(500).json({ error: err.message });
+                return;
+            }
+            res.status(201).json({ message: 'Funcionário adicionado com sucesso!', id: this.lastID });
+        });
     });
 });
 

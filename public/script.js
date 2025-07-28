@@ -1,4 +1,4 @@
-async function adicionarAPI(novaTarefa, tipo) {
+async function adicionarAPI(novaTarefa, tipo) { // faz uma requisição para adicionar tarefas ou funcionário
     try {
         const response = await fetch('http://localhost:3000/api/' + tipo, {
             method: 'POST',
@@ -15,7 +15,7 @@ async function adicionarAPI(novaTarefa, tipo) {
     }
 }
 
-async function atualizarTarefaAPI(id, tarefa) {
+async function atualizarTarefaAPI(id, tarefa) { // faz a requisição para finalizar uma tarefa
     try {
         const response = await fetch(`http://localhost:3000/api/tarefas/${id}`, {
             method: 'PUT',
@@ -32,7 +32,7 @@ async function atualizarTarefaAPI(id, tarefa) {
     }
 }
 
-async function deletarTarefaAPI(id) {
+async function deletarTarefaAPI(id) { // faz a requisição para deletar uma tarefa
     try {
         const response = await fetch(`http://localhost:3000/api/tarefas/${id}`, {method: 'DELETE'});
         const result = await response.json();
@@ -44,7 +44,7 @@ async function deletarTarefaAPI(id) {
     }
 }
 
-async function conseguindoEmail(nome) {
+async function conseguindoEmail(nome) { //obtém o email do funcionario no banco de dados
     try {
         const response = await fetch(`http://localhost:3000/api/funcionarios/email/${encodeURIComponent(nome)}`); // encodeURIComponent é importante para nomes com espaços ou caracteres especiais
         if (!response.ok) {
@@ -62,24 +62,22 @@ async function conseguindoEmail(nome) {
     }
 }
 
-async function mandarEmail(funcionario, assunto, corpo) {
+async function mandarEmail(funcionario, assunto, corpo) { //faz a requisição para enviar o email
     const destinatario = await conseguindoEmail(funcionario);
-    //const assunto = 'teste';
-    //const corpo = "testando essa bagaça do krl";
     console.log(email);
     try {
         const resposta = await fetch('/enviar-email', { // Seu endpoint da API de backend
             method: 'POST', headers: {'Content-Type': 'application/json',}, body: JSON.stringify({ destinatario, assunto, corpo }),
         });
         const dados = await resposta.json();
-        alert(resposta.ok ? 'E-mail enviado com sucesso!' : `Erro ao enviar e-mail: ${dados.message}`)
+        if (resposta.ok) avisarTarefa("Sucesso", 'E-mail enviado com sucesso!');
+        else avisarTarefa("Erro", 'E-mail enviado com sucesso!');
     } catch (error) {
-        console.error('Erro de rede:', error);
-        alert('Não foi possível conectar ao servidor.');
+        avisarTarefa("Erro",'Não foi possível conectar ao servidor.');
     }
 }
 
-async function addTarefa() {
+async function addTarefa() { // adiciona uma nova tarefa
     const novaTarefa = {
         acao : document.getElementById('acao').value,
         responsavel : document.getElementById('responsavel').value,
@@ -98,42 +96,45 @@ async function addTarefa() {
         await adicionarAPI(novaTarefa, 'tarefas');
         document.getElementById('formularioTarefa').reset();
         await loadAndDisplayTarefas();
-        await mandarEmail(novaTarefa.responsavel, "Nova Tarefa", "Você tem uma nova tarefa: " + novaTarefa.acao + ", para ser entregue " + novaTarefa.data + " as " + novaTarefa.hora + " horas.");
-        alert('Tarefa adicionada com sucesso!');
+        avisarTarefa('Sucesso', 'Tarefa adicionada com sucesso!');
     } catch (error) {
-        alert('Erro ao adicionar tarefa: ' + error.message);
+        avisarTarefa('Erro', 'Ao ao adicionar tarefa: ' + error.message);
     }
 }
 
-async function addFuncionario() {
+async function addFuncionario() { // adiciona um novo Funcionário
     const novoFuncionario = {
-        nome: document.getElementById('nome').value, 
+        nome: document.getElementById('nome').value,
         email: document.getElementById('email').value
     }
 
     if (!novoFuncionario.nome || !novoFuncionario.email) {
-        console.log('Campos obrigatórios ausentes.');
+        mostrarAviso("Aviso", 'Por favor, preencha todos os campos.'); 
         return;
     }
-    
+
     try {
         await adicionarAPI(novoFuncionario, 'funcionarios');
         await loadAndDisplayTarefas();
+        await loadFuncionariosIntoSelect()
         document.getElementById('formularioFuncionario').reset();
-        alert('Funcionario adicionado com sucesso!');
-    } catch (error) {
-        alert('Erro ao adicionar tarefa: ' + error.message);
+        mostrarAviso('Sucesso', 'Funcionário adicionado com sucesso!');
+    } catch (error) { // Verificar se o erro é de conflito (email já existe)
+        if (error.message.includes('Já existe um funcionário cadastrado com este e-mail.')) {
+            mostrarAviso('Erro', 'Já existe um funcionário com este e-mail. Por favor, use outro e-mail.');
+        } else {
+            mostrarAviso('Erro ao adicionar funcionário: ' + error.message);
+        }
     }
 }
 
-function calcularDiferencaEntreDatas(dataInicial, dataFinal) {
+function calcularDiferencaEntreDatas(dataInicial, dataFinal) { //retorna o atraso
   const msPorMinuto = 60 * 1000;
   const msPorHora = 60 * msPorMinuto;
   const msPorDia = 24 * msPorHora;
   const inicio = new Date(dataInicial);
   const fim = new Date(dataFinal);
 
-  //const diferencaMs = Math.abs(fim - inicio);
   const diferencaMs = fim - inicio;
   const dias = Math.floor(diferencaMs / msPorDia);
   const horasRestantesMs = diferencaMs % msPorDia;
@@ -144,38 +145,64 @@ function calcularDiferencaEntreDatas(dataInicial, dataFinal) {
   return {dias: dias, horas: horas, minutos: minutos};
 }
 
-async function atualizarTarefa(id, data, hora) {
+function mostrarAviso(title, message) {
+    const toast = document.getElementById('myToast');
+    const toastTitle = document.getElementById('toastTitle');
+    const toastMessage = document.getElementById('toastMessage');
+
+    toastTitle.textContent = title;
+    toastMessage.textContent = message;
+    toast.classList.remove('hide');
+    toast.classList.add('show');
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+        toast.classList.add('hide');
+    }, 3000);
+}
+
+
+async function atualizarTarefa(id, data, hora) {// faz a requisição para atualizar uma tarefa
     if (confirm('Tem certeza que deseja concluir esta tarefa?')) {
-        let resultado = "Sem atrasos";
+        let resultado = "Entregue no prazo"
         const entrega = data + "T" + hora + ":00";
         const atraso = calcularDiferencaEntreDatas(new Date(entrega), new Date());
         if (atraso.dias >= 0) {
-            resultado = "Atraso de " + atraso.dias + " dias, " + atraso.horas + " horas e " + atraso.minutos + " minutos.";
+            resultado = "Entregue com atraso de " + atraso.dias + " dias, " + atraso.horas + " horas e " + atraso.minutos + " minutos.";
         }
                 
         try {
             await atualizarTarefaAPI(id, { status: resultado });
             await loadAndDisplayTarefas();
-            alert("Status atualizado para concluído!")
+            avisarTarefa("Sucesso", "Status atualizado para concluído!")
         } catch (error) {
-            alert('Erro ao atualizar status da tarefa: ' + error.message);
+            avisarTarefa("Erro", 'Ao atualizar status da tarefa: ' + error.message);
         }
     }
 }
 
-async function deletarTarefa(id) {
+async function deletarTarefa(id) {// faz a requisição para deletar uma tarefa
     if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
         try {
             await deletarTarefaAPI(id);
-            alert('Tarefa excluída com sucesso!');
             await loadAndDisplayTarefas();
+            avisarTarefa("Sucesso", 'Tarefa excluída com sucesso!');
+            
         } catch (error) {
-            console.log('Erro ao excluir tarefa: ' + error.message);
+            avisarTarefa('Erro', 'Ao excluir tarefa: ' + error.message);
         }
     }
 }
 
-async function loadFuncionariosIntoSelect() {
+async function avisarTarefa(responsavel, tarefa, atraso) { // gera um email de aviso
+    let msg = "O prazo para a seguinte tarefa: " + tarefa + ", ";
+    if (atraso.dias > -1) msg +=  "venceu á " + atraso.dias + " dias, " + atraso.horas + " horas e " + atraso.minutos + " minutos.";
+    else msg += "irá vencer em " + ((atraso.dias + 1) * -1) + " dias, " + ((atraso.horas + 1) * -1) + " horas e " + (atraso.minutos * -1) + " minutos.";
+    const assunto = atraso.dias > -1 ? "Tarefa em atraso" : "Tarefa próxima ao vencimento";
+    await mandarEmail(responsavel, assunto , msg);
+}
+
+async function loadFuncionariosIntoSelect() { // carrega a seleção de funcionários
     try {
         const response = await fetch('http://localhost:3000/api/funcionarios');
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -183,29 +210,27 @@ async function loadFuncionariosIntoSelect() {
         const funcionarios = data.funcionarios;
 
         const responsavelSelect = document.getElementById('responsavel');
-        responsavelSelect.innerHTML = ''; // Limpa as opções existentes
+        responsavelSelect.innerHTML = '';
 
-        // Adiciona uma opção padrão (opcional)
         const defaultOption = document.createElement('option');
         defaultOption.value = '';
         defaultOption.textContent = 'Selecione um funcionário';
-        defaultOption.disabled = true; // Impede que seja selecionado
-        defaultOption.selected = true; // Torna-o a opção selecionada por padrão
+        defaultOption.disabled = true;
+        defaultOption.selected = true;
         responsavelSelect.appendChild(defaultOption);
 
         funcionarios.forEach(func => {
             const option = document.createElement('option');
-            option.value = func.nome; // Ou func.ID se você preferir salvar o ID no banco
+            option.value = func.nome;
             option.textContent = func.nome;
             responsavelSelect.appendChild(option);
         });
     } catch (error) {
-        console.error('Erro ao carregar funcionários:', error.message);
-        // alert('Erro ao carregar funcionários para seleção.');
+        avisarTarefa('Erro', 'Ao carregar funcionários para seleção.');
     }
 }
 
-async function loadAndDisplayTarefas(filtroResponsavel = 'todos', termoBuscaGeral = '') {
+async function loadAndDisplayTarefas(filtroResponsavel = 'todos', termoBuscaGeral = '') { //carrega áss tarefas
     try {
         const response = await fetch('http://localhost:3000/api/tarefas');
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -278,8 +303,7 @@ async function loadAndDisplayTarefas(filtroResponsavel = 'todos', termoBuscaGera
             const aviso = row.insertCell();
             const btnAviso = document.createElement('button');
             btnAviso.textContent = 'Avisar';
-            //btnAviso.classList.add('complete-btn');
-            btnAviso.onclick = () => {mandarEmail(tarefa.responsavel)};
+            btnAviso.onclick = () => {avisarTarefa(tarefa.responsavel, tarefa.acao, atraso)};
             aviso.appendChild(btnAviso);
         });
 
@@ -298,7 +322,7 @@ async function loadAndDisplayTarefas(filtroResponsavel = 'todos', termoBuscaGera
             actionCell.appendChild(deleteButton);
         });
     } catch (error) {
-        alert('Erro ao carregar e exibir rotas:', error.message);
+        avisarTarefa("'Erro", "Ao carregar e exibir rotas:', error.message");
     }
 }
 
@@ -330,12 +354,14 @@ document.addEventListener('DOMContentLoaded', async function() {
         loadAndDisplayTarefas('todos', '');
     });
 
-    document.getElementById('formularioTarefa').addEventListener('submit', function(e) {
+    //Event Listener para o botãp de adicionar tarefa
+    document.getElementById('formularioTarefa').addEventListener('submit', (e) => {
         e.preventDefault();
         addTarefa();
     });
 
-    document.getElementById('formularioFuncionario').addEventListener('submit', function(e) {
+    //Event Listener para o botãp de adicionar tarefa
+    document.getElementById('formularioFuncionario').addEventListener('submit', (e) => {
         e.preventDefault();
         addFuncionario();
     });

@@ -142,7 +142,7 @@ input, select {
     color: white;
     padding: 15px;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 8px #00000033;
     transition: right 0.8s ease-in-out;
     z-index: 1000;
     font-family: '';
@@ -166,5 +166,23 @@ input, select {
 }
 
 .fundo-vermelho {
-    background-color: red;
+    background-color: #af4c4c;
+}
+
+.toast-progress-bar {
+    height: 5px;
+    background-color: #fcf8f8;
+    width: 100%;
+    margin-top: 10px;
+    border-radius: 5px;
+    animation: progressBar 5s linear forwards;
+}
+
+@keyframes progressBar {
+    from {
+        width: 100%;
+    }
+    to {
+        width: 0%;
+    }
 }

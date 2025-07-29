@@ -10,7 +10,7 @@ async function adicionarAPI(novaTarefa, tipo) { // faz uma requisição para adi
         if (!response.ok) throw new Error(result.error || 'Erro desconhecido ao adicionar');
         return result; // Pode conter o ID da nova rota
     } catch (error) {
-        console.error('Erro ao adicionar na API:', error.message);
+        mostrarToast('Erro', 'Ao adicionar na API: ' + error.message);
         throw error;
     }
 }
@@ -27,7 +27,7 @@ async function atualizarTarefaAPI(id, tarefa) { // faz a requisição para final
         if (!response.ok) throw new Error(result.error || 'Erro desconhecido ao atualizar status.');
         return result;
     } catch (error) {
-        console.error(`Erro ao atualizar rota com ID ${id} na API:`, error.message);
+        mostrarToast(`Erro`, `Ao atualizar rota com ID ${id} na API: ` + error.message);
         throw error;
     }
 }
@@ -39,7 +39,7 @@ async function deletarTarefaAPI(id) { // faz a requisição para deletar uma tar
         if (!response.ok) throw new Error(result.error || 'Erro desconhecido ao deletar rota.');
         return result;
     } catch (error) {
-        console.error(`Erro ao deletar rota com ID ${id} na API:`, error.message);
+        mostrarToast(`Erro`, `Ao deletar rota com ID ${id} na API: ` + error.message);
         throw error;
     }
 }
@@ -57,23 +57,22 @@ async function conseguindoEmail(nome) { //obtém o email do funcionario no banco
         const data = await response.json();
         return data.email;
     } catch (error) {
-        console.error('Erro ao buscar email do funcionário:', error.message);
+        mostrarToast('Erro ao buscar email do funcionário:', error.message);
         return null;
     }
 }
 
 async function mandarEmail(funcionario, assunto, corpo) { //faz a requisição para enviar o email
     const destinatario = await conseguindoEmail(funcionario);
-    console.log(email);
     try {
         const resposta = await fetch('/enviar-email', { // Seu endpoint da API de backend
             method: 'POST', headers: {'Content-Type': 'application/json',}, body: JSON.stringify({ destinatario, assunto, corpo }),
         });
         const dados = await resposta.json();
-        if (resposta.ok) avisarTarefa("Sucesso", 'E-mail enviado com sucesso!');
-        else avisarTarefa("Erro", 'E-mail enviado com sucesso!');
+        if (resposta.ok) mostrarToast("Sucesso", 'E-mail enviado com sucesso!');
+        else mostrarToast("Erro", 'E-mail não enviado.');
     } catch (error) {
-        avisarTarefa("Erro",'Não foi possível conectar ao servidor.');
+        mostrarToast("Erro",'Não foi possível conectar ao servidor.');
     }
 }
 
@@ -96,9 +95,9 @@ async function addTarefa() { // adiciona uma nova tarefa
         await adicionarAPI(novaTarefa, 'tarefas');
         document.getElementById('formularioTarefa').reset();
         await loadAndDisplayTarefas();
-        avisarTarefa('Sucesso', 'Tarefa adicionada com sucesso!');
+        mostrarToast('Sucesso', 'Tarefa adicionada com sucesso!');
     } catch (error) {
-        avisarTarefa('Erro', 'Ao ao adicionar tarefa: ' + error.message);
+        mostrarToast('Erro', 'Ao ao adicionar tarefa: ' + error.message);
     }
 }
 
@@ -109,7 +108,7 @@ async function addFuncionario() { // adiciona um novo Funcionário
     }
 
     if (!novoFuncionario.nome || !novoFuncionario.email) {
-        mostrarAviso("Aviso", 'Por favor, preencha todos os campos.'); 
+        mostrarToast("Aviso", 'Por favor, preencha todos os campos.'); 
         return;
     }
 
@@ -118,12 +117,12 @@ async function addFuncionario() { // adiciona um novo Funcionário
         await loadAndDisplayTarefas();
         await loadFuncionariosIntoSelect()
         document.getElementById('formularioFuncionario').reset();
-        mostrarAviso('Sucesso', 'Funcionário adicionado com sucesso!');
+        mostrarToast('Sucesso', 'Funcionário adicionado com sucesso!');
     } catch (error) { // Verificar se o erro é de conflito (email já existe)
         if (error.message.includes('Já existe um funcionário cadastrado com este e-mail.')) {
-            mostrarAviso('Erro', 'Já existe um funcionário com este e-mail. Por favor, use outro e-mail.');
+            mostrarToast('Erro', 'Já existe um funcionário com este e-mail. Por favor, use outro e-mail.');
         } else {
-            mostrarAviso('Erro ao adicionar funcionário: ' + error.message);
+            mostrarToast('Erro ao adicionar funcionário: ' + error.message);
         }
     }
 }
@@ -145,20 +144,33 @@ function calcularDiferencaEntreDatas(dataInicial, dataFinal) { //retorna o atras
   return {dias: dias, horas: horas, minutos: minutos};
 }
 
-function mostrarAviso(title, message) {
+function mostrarToast(title, message) { // gera a msg toast
     const toast = document.getElementById('myToast');
     const toastTitle = document.getElementById('toastTitle');
     const toastMessage = document.getElementById('toastMessage');
+    const toastProgressBar = document.getElementById('toastProgressBar');
 
     toastTitle.textContent = title;
     toastMessage.textContent = message;
     toast.classList.remove('hide');
     toast.classList.add('show');
+    
+    if (title === "Erro") {
+        toastTitle.textContent = '✖ ' + title;
+        toast.classList.add('fundo-vermelho');
+    } else {
+        toastTitle.textContent = '✔ ' + title;
+        toast.classList.remove('fundo-vermelho');
+    }
 
+    toastProgressBar.style.animation = 'none';
+    void toastProgressBar.offsetWidth; // Força o reflow para reiniciar a animação
+    toastProgressBar.style.animation = null;
+    
     setTimeout(() => {
         toast.classList.remove('show');
         toast.classList.add('hide');
-    }, 3000);
+    }, 5000);
 }
 
 
@@ -174,9 +186,9 @@ async function atualizarTarefa(id, data, hora) {// faz a requisição para atual
         try {
             await atualizarTarefaAPI(id, { status: resultado });
             await loadAndDisplayTarefas();
-            avisarTarefa("Sucesso", "Status atualizado para concluído!")
+            mostrarToast("Sucesso", "Tarefa concluída com sucesso!");
         } catch (error) {
-            avisarTarefa("Erro", 'Ao atualizar status da tarefa: ' + error.message);
+            mostrarToast("Erro", 'Ao atualizar status da tarefa: ' + error.message);
         }
     }
 }
@@ -186,10 +198,9 @@ async function deletarTarefa(id) {// faz a requisição para deletar uma tarefa
         try {
             await deletarTarefaAPI(id);
             await loadAndDisplayTarefas();
-            avisarTarefa("Sucesso", 'Tarefa excluída com sucesso!');
-            
+            mostrarToast("Sucesso", 'Tarefa excluída com sucesso!');
         } catch (error) {
-            avisarTarefa('Erro', 'Ao excluir tarefa: ' + error.message);
+            mostrarToast('Erro', 'Ao excluir tarefa: ' + error.message);
         }
     }
 }
@@ -226,7 +237,7 @@ async function loadFuncionariosIntoSelect() { // carrega a seleção de funcion�
             responsavelSelect.appendChild(option);
         });
     } catch (error) {
-        avisarTarefa('Erro', 'Ao carregar funcionários para seleção.');
+        mostrarToast('Erro', 'Ao carregar funcionários para seleção.');
     }
 }
 
@@ -285,7 +296,7 @@ async function loadAndDisplayTarefas(filtroResponsavel = 'todos', termoBuscaGera
             row.insertCell().textContent = tarefa.acao;
             row.insertCell().textContent = tarefa.responsavel;
             row.insertCell().textContent = tarefa.urgencia;
-            row.insertCell().textContent = tarefa.data;
+            row.insertCell().textContent =  new Date(tarefa.data).toLocaleDateString('pt-BR');
             row.insertCell().textContent = tarefa.hora;
 
             const entrega = tarefa.data + "T" + tarefa.hora + ":00";
@@ -322,7 +333,7 @@ async function loadAndDisplayTarefas(filtroResponsavel = 'todos', termoBuscaGera
             actionCell.appendChild(deleteButton);
         });
     } catch (error) {
-        avisarTarefa("'Erro", "Ao carregar e exibir rotas:', error.message");
+        mostrarToast("'Erro", "Ao carregar e exibir rotas:', error.message");
     }
 }
 

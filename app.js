@@ -55,15 +55,31 @@ app.use(express.static(path.join(__dirname, 'public'), {
     }
 }));
 
+// ...
 app.get('/api/tarefas', (req, res) => {
-    db.all('SELECT *, ID AS ID FROM tarefas', [], (err, rows) => {
+    const page = parseInt(req.query._page) || 1; // Página padrão é 1
+    const limit = parseInt(req.query._limit) || 10; // Limite padrão de 10 itens por página
+    const offset = (page - 1) * limit; // Calcular o offset
+
+    // Primeiro, conte o total de tarefas para calcular o total de páginas
+    db.get('SELECT COUNT(*) AS total FROM tarefas', [], (err, countRow) => {
         if (err) {
             res.status(500).json({ error: err.message });
             return;
         }
-        res.json({ tarefas: rows });
+        const totalTarefas = countRow.total;
+
+        // Em seguida, selecione as tarefas para a página atual
+        db.all('SELECT *, ID AS ID FROM tarefas LIMIT ? OFFSET ?', [limit, offset], (err, rows) => {
+            if (err) {
+                res.status(500).json({ error: err.message });
+                return;
+            }
+            res.json({tarefas: rows, total: totalTarefas, page: page, limit: limit});
+        });
     });
 });
+// ...
 
 app.get('/api/funcionarios', (req, res) => {
     db.all('SELECT *, ID AS ID FROM funcionarios', [], (err, rows) => {

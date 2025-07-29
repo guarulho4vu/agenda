@@ -19,7 +19,7 @@
         <div id="myToast" class="toast-container">
             <div class="toast-title" id="toastTitle"></div>
             <div class="toast-message" id="toastMessage"></div>
-            <div class="toast-progress-bar" id="toastProgressBar"></div>
+            <div class="toast-progress-bar" id="toastProgressBar"></div> </div>
         </div>
 
         <div id="main">
@@ -110,21 +110,27 @@
                     </thead>
                     <tbody id="andamento"></tbody>
                 </table>
+                <div class="paginacao">
+                    <button id="prevPage">Anterior</button>
+                    <span id="currentPage">1</span> / <span id="totalPages">1</span>
+                    <button id="nextPage">Próximo</button>
+                </div>
             </div>
 
             <div class="separacao">
                 <h2>Tarefas Concluidas</h2>
                 <table class="dados-banco">
-                <thead>
-                    <tr>
-                        <th>Tarefa</th>
-                        <th>Responsável</th>
-                        <th>Prioridade</th>
-                        <th>Status</th>
-                        <th>Ações</th> 
-                    </tr>
-                </thead>
-                <tbody id="concluido"></tbody>
+                    <thead>
+                        <tr>
+                            <th>Tarefa</th>
+                            <th>Responsável</th>
+                            <th>Prioridade</th>
+                            <th>Status</th>
+                            <th>Ações</th> 
+                        </tr>
+                    </thead>
+                    <tbody id="concluido"></tbody>
+                </table>
             </div>
         </div>
         <script src="script.js?v=20250723"></script>

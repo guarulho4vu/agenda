@@ -1,3 +1,6 @@
+let currentPage = 1;
+const itemsPerPage = 10;
+
 async function adicionarAPI(novaTarefa, tipo) { // faz uma requisição para adicionar tarefas ou funcionário
     try {
         const response = await fetch('http://localhost:3000/api/' + tipo, {
@@ -241,13 +244,19 @@ async function loadFuncionariosIntoSelect() { // carrega a seleção de funcion�
     }
 }
 
-async function loadAndDisplayTarefas(filtroResponsavel = 'todos', termoBuscaGeral = '') { //carrega áss tarefas
+async function loadAndDisplayTarefas(filtroResponsavel = 'todos', termoBuscaGeral = '', page = 1, limit = itemsPerPage) { //carrega áss tarefas
     try {
-        const response = await fetch('http://localhost:3000/api/tarefas');
+        const response = await fetch(`http://localhost:3000/api/tarefas?_page=${page}&_limit=${limit}`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         let tarefas = data.tarefas;
+        const totalTarefas = data.total;
+        const totalPages = Math.ceil(totalTarefas / itemsPerPage);
 
+        document.getElementById('currentPage').textContent = page;
+        document.getElementById('totalPages').textContent = totalPages;
+        document.getElementById('prevPage').disabled = (page === 1);
+        document.getElementById('nextPage').disabled = (page === totalPages)
 
         const filtroResponsavelSelect = document.getElementById('filtroResponsavel');
         const responsaveisUnicos = ['todos', ...new Set(tarefas.map(t => t.responsavel))];
@@ -338,31 +347,49 @@ async function loadAndDisplayTarefas(filtroResponsavel = 'todos', termoBuscaGera
 }
 
 document.addEventListener('DOMContentLoaded', async function() {
-    await loadAndDisplayTarefas();
+    await loadAndDisplayTarefas('todos', '', currentPage, itemsPerPage);
     await loadFuncionariosIntoSelect();
+
+    document.getElementById('prevPage').addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            loadAndDisplayTarefas(document.getElementById('filtroResponsavel').value, document.getElementById('filtroGeral').value, currentPage, itemsPerPage);
+        }
+    });
+
+    document.getElementById('nextPage').addEventListener('click', () => {
+        const totalPages = parseInt(document.getElementById('totalPages').textContent);
+        if (currentPage < totalPages) {
+            currentPage++;
+            loadAndDisplayTarefas(document.getElementById('filtroResponsavel').value, document.getElementById('filtroGeral').value, currentPage, itemsPerPage);
+        }
+    });
 
     // Event listener para o filtro de responsável
     const filtroResponsavelSelect = document.getElementById('filtroResponsavel');
     filtroResponsavelSelect.addEventListener('change', () => {
+        currentPage = 1; // Volta para a primeira página ao aplicar filtro
         const responsavelSelecionado = filtroResponsavelSelect.value;
-        const termoBuscaGeral = document.getElementById('filtroGeral').value; 
-        loadAndDisplayTarefas(responsavelSelecionado, termoBuscaGeral);
+        const termoBuscaGeral = document.getElementById('filtroGeral').value;
+        loadAndDisplayTarefas(responsavelSelecionado, termoBuscaGeral, currentPage, itemsPerPage);
     });
 
     // Event listener para o filtro de busca geral (digitação)
     const filtroGeralInput = document.getElementById('filtroGeral');
     filtroGeralInput.addEventListener('keyup', () => {
+        currentPage = 1; // Volta para a primeira página ao aplicar filtro
         const responsavelSelecionado = document.getElementById('filtroResponsavel').value;
         const termoBuscaGeral = filtroGeralInput.value;
-        loadAndDisplayTarefas(responsavelSelecionado, termoBuscaGeral);
+        loadAndDisplayTarefas(responsavelSelecionado, termoBuscaGeral, currentPage, itemsPerPage);
     });
 
     // Event listener para o botão de limpar filtro
     const limparFiltroButton = document.getElementById('limparFiltro');
     limparFiltroButton.addEventListener('click', () => {
+        currentPage = 1; // Volta para a primeira página ao limpar filtro
         filtroResponsavelSelect.value = 'todos';
         filtroGeralInput.value = '';
-        loadAndDisplayTarefas('todos', '');
+        loadAndDisplayTarefas('todos', '', currentPage, itemsPerPage);
     });
 
     //Event Listener para o botãp de adicionar tarefa

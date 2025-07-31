@@ -284,13 +284,12 @@ async function loadAndDisplayTarefasAndamento(filtroResponsavel = 'todos', termo
 
         tarefas.forEach(tarefa => {
             const row = andamentoTbody.insertRow();
+            const data = tarefa.data.split('-');
             row.insertCell().textContent = tarefa.acao;
             row.insertCell().textContent = tarefa.responsavel;
-            row.insertCell().textContent = tarefa.urgencia;
-            row.insertCell().textContent =  tarefa.data + " ás " + tarefa.hora;
+            row.insertCell().textContent =  `${data[2]}/${data[1]}/${data[0]}` + " ás " + tarefa.hora;
 
             const entrega = tarefa.data + "T" + tarefa.hora + ":00";
-            console.log(entrega);
             const atraso = calcularDiferencaEntreDatas(new Date(entrega), new Date());
 
             if (atraso.dias > 0 || atraso.horas >= 0 || atraso.minutos >= 0) row.classList.add("vermelho");

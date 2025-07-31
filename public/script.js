@@ -1,4 +1,5 @@
-let currentPage = 1;
+let currentPageAndamento = 1;
+let currentPageConcluido = 1;
 const itemsPerPage = 10;
 
 async function adicionarAPI(novaTarefa, tipo) { // faz uma requisição para adicionar tarefas ou funcionário
@@ -86,18 +87,19 @@ async function addTarefa() { // adiciona uma nova tarefa
         urgencia : document.getElementById('urgencia').value,
         data : document.getElementById('data').value,
         hora : document.getElementById('hora').value,
-        status : 'pendente'
+        status : 'pendente',
+        atraso: 'pendente'
     }
 
     if (!novaTarefa.acao || !novaTarefa.responsavel || !novaTarefa.urgencia || !novaTarefa.data || !novaTarefa.hora) {
         console.log('Campos obrigatórios ausentes.');
         return;
     }
-    
+
     try {
         await adicionarAPI(novaTarefa, 'tarefas');
         document.getElementById('formularioTarefa').reset();
-        await loadAndDisplayTarefas();
+        await loadAndDisplayAllTarefas(); // Load both sections
         mostrarToast('Sucesso', 'Tarefa adicionada com sucesso!');
     } catch (error) {
         mostrarToast('Erro', 'Ao ao adicionar tarefa: ' + error.message);
@@ -111,13 +113,13 @@ async function addFuncionario() { // adiciona um novo Funcionário
     }
 
     if (!novoFuncionario.nome || !novoFuncionario.email) {
-        mostrarToast("Aviso", 'Por favor, preencha todos os campos.'); 
+        mostrarToast("Aviso", 'Por favor, preencha todos os campos.');
         return;
     }
 
     try {
         await adicionarAPI(novoFuncionario, 'funcionarios');
-        await loadAndDisplayTarefas();
+        await loadAndDisplayAllTarefas(); // Load both sections
         await loadFuncionariosIntoSelect()
         document.getElementById('formularioFuncionario').reset();
         mostrarToast('Sucesso', 'Funcionário adicionado com sucesso!');
@@ -130,21 +132,20 @@ async function addFuncionario() { // adiciona um novo Funcionário
     }
 }
 
-function calcularDiferencaEntreDatas(dataInicial, dataFinal) { //retorna o atraso
-  const msPorMinuto = 60 * 1000;
-  const msPorHora = 60 * msPorMinuto;
-  const msPorDia = 24 * msPorHora;
-  const inicio = new Date(dataInicial);
-  const fim = new Date(dataFinal);
+function calcularDiferencaEntreDatas(dataInicial, dataFinal) {
+    const msPorMinuto = 60 * 1000;
+    const msPorHora = 60 * msPorMinuto;
+    const msPorDia = 24 * msPorHora;
+    const inicio = new Date(dataInicial);
+    const fim = new Date(dataFinal);
+    const diferencaMs = fim - inicio;
+    const dias = Math.floor(diferencaMs / msPorDia);
+    const horasRestantesMs = diferencaMs % msPorDia;
+    const horas = Math.floor(horasRestantesMs / msPorHora);
+    const minutosRestantesMs = horasRestantesMs % msPorHora;
+    const minutos = Math.floor(minutosRestantesMs / msPorMinuto); 
 
-  const diferencaMs = fim - inicio;
-  const dias = Math.floor(diferencaMs / msPorDia);
-  const horasRestantesMs = diferencaMs % msPorDia;
-  const horas = Math.floor(horasRestantesMs / msPorHora);
-  const minutosRestantesMs = horasRestantesMs % msPorHora;
-  const minutos = Math.floor(minutosRestantesMs / msPorMinuto);
-
-  return {dias: dias, horas: horas, minutos: minutos};
+    return { dias: dias, horas: horas, minutos: minutos };
 }
 
 function mostrarToast(title, message) { // gera a msg toast
@@ -157,7 +158,7 @@ function mostrarToast(title, message) { // gera a msg toast
     toastMessage.textContent = message;
     toast.classList.remove('hide');
     toast.classList.add('show');
-    
+
     if (title === "Erro") {
         toastTitle.textContent = '✖ ' + title;
         toast.classList.add('fundo-vermelho');
@@ -167,28 +168,23 @@ function mostrarToast(title, message) { // gera a msg toast
     }
 
     toastProgressBar.style.animation = 'none';
-    void toastProgressBar.offsetWidth; // Força o reflow para reiniciar a animação
+    void toastProgressBar.offsetWidth;
     toastProgressBar.style.animation = null;
-    
+
     setTimeout(() => {
         toast.classList.remove('show');
         toast.classList.add('hide');
     }, 5000);
 }
 
-
-async function atualizarTarefa(id, data, hora) {// faz a requisição para atualizar uma tarefa
+async function atualizarTarefa(id, entrega) {// faz a requisição para atualizar uma tarefa
     if (confirm('Tem certeza que deseja concluir esta tarefa?')) {
-        let resultado = "Entregue no prazo"
-        const entrega = data + "T" + hora + ":00";
+        let resultado = "Sem atraso";
         const atraso = calcularDiferencaEntreDatas(new Date(entrega), new Date());
-        if (atraso.dias >= 0) {
-            resultado = "Entregue com atraso de " + atraso.dias + " dias, " + atraso.horas + " horas e " + atraso.minutos + " minutos.";
-        }
-                
+        if (atraso.dias >= 0) resultado = "Atraso de " + atraso.dias + " dias, " + atraso.horas + " horas e " + atraso.minutos + " minutos.";
         try {
-            await atualizarTarefaAPI(id, { status: resultado });
-            await loadAndDisplayTarefas();
+            await atualizarTarefaAPI(id, { status : 'concluido', atraso : resultado });
+            await loadAndDisplayAllTarefas(); // Load both sections
             mostrarToast("Sucesso", "Tarefa concluída com sucesso!");
         } catch (error) {
             mostrarToast("Erro", 'Ao atualizar status da tarefa: ' + error.message);
@@ -200,7 +196,7 @@ async function deletarTarefa(id) {// faz a requisição para deletar uma tarefa
     if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
         try {
             await deletarTarefaAPI(id);
-            await loadAndDisplayTarefas();
+            await loadAndDisplayAllTarefas(); // Load both sections
             mostrarToast("Sucesso", 'Tarefa excluída com sucesso!');
         } catch (error) {
             mostrarToast('Erro', 'Ao excluir tarefa: ' + error.message);
@@ -210,11 +206,19 @@ async function deletarTarefa(id) {// faz a requisição para deletar uma tarefa
 
 async function avisarTarefa(responsavel, tarefa, atraso) { // gera um email de aviso
     let msg = "O prazo para a seguinte tarefa: " + tarefa + ", ";
-    if (atraso.dias > -1) msg +=  "venceu á " + atraso.dias + " dias, " + atraso.horas + " horas e " + atraso.minutos + " minutos.";
+    if (atraso.dias > -1 || atraso.horas > -1 || atraso.minutos > -1) { // If overdue or due today
+        const totalMinutesOverdue = atraso.dias * 24 * 60 + atraso.horas * 60 + atraso.minutos;
+        if (totalMinutesOverdue > 0) { // Strictly overdue
+            msg +=  "venceu há " + atraso.dias + " dias, " + atraso.horas + " horas e " + atraso.minutos + " minutos.";
+        } else { // Due today or in the future
+            msg += "está próxima do vencimento.";
+        }
+    }
     else msg += "irá vencer em " + ((atraso.dias + 1) * -1) + " dias, " + ((atraso.horas + 1) * -1) + " horas e " + (atraso.minutos * -1) + " minutos.";
-    const assunto = atraso.dias > -1 ? "Tarefa em atraso" : "Tarefa próxima ao vencimento";
+    const assunto = (atraso.dias > 0 || (atraso.dias === 0 && (atraso.horas > 0 || atraso.minutos > 0))) ? "Tarefa em atraso" : "Tarefa próxima ao vencimento";
     await mandarEmail(responsavel, assunto , msg);
 }
+
 
 async function loadFuncionariosIntoSelect() { // carrega a seleção de funcionários
     try {
@@ -244,35 +248,23 @@ async function loadFuncionariosIntoSelect() { // carrega a seleção de funcion�
     }
 }
 
-async function loadAndDisplayTarefas(filtroResponsavel = 'todos', termoBuscaGeral = '', page = 1, limit = itemsPerPage) { //carrega áss tarefas
+async function loadAndDisplayTarefasAndamento(filtroResponsavel = 'todos', termoBuscaGeral = '', page = 1, limit = itemsPerPage) {
     try {
-        const response = await fetch(`http://localhost:3000/api/tarefas?_page=${page}&_limit=${limit}`);
+        const response = await fetch(`http://localhost:3000/api/tarefas?status=pendente&_page=${page}&_limit=${limit}`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         let tarefas = data.tarefas;
         const totalTarefas = data.total;
         const totalPages = Math.ceil(totalTarefas / itemsPerPage);
 
-        document.getElementById('currentPage').textContent = page;
-        document.getElementById('totalPages').textContent = totalPages;
-        document.getElementById('prevPage').disabled = (page === 1);
-        document.getElementById('nextPage').disabled = (page === totalPages)
+        document.getElementById('currentPageAndamento').textContent = page;
+        document.getElementById('totalPagesAndamento').textContent = totalPages;
+        document.getElementById('prevPageAndamento').disabled = (page === 1);
+        document.getElementById('nextPageAndamento').disabled = (page === totalPages || totalPages === 0);
 
-        const filtroResponsavelSelect = document.getElementById('filtroResponsavel');
-        const responsaveisUnicos = ['todos', ...new Set(tarefas.map(t => t.responsavel))];
-        
-        const currentSelection = filtroResponsavelSelect.value;
-        filtroResponsavelSelect.innerHTML = '';
-
-        responsaveisUnicos.forEach(responsavel => {
-            const option = document.createElement('option');
-            option.value = responsavel;
-            option.textContent = responsavel.charAt(0).toUpperCase() + responsavel.slice(1);
-            if (responsavel === currentSelection) option.selected = true;
-            filtroResponsavelSelect.appendChild(option);
-        });
-
-        if (filtroResponsavel !== 'todos') tarefas = tarefas.filter(tarefa => tarefa.responsavel === filtroResponsavel);
+        if (filtroResponsavel !== 'todos') {
+            tarefas = tarefas.filter(tarefa => tarefa.responsavel === filtroResponsavel);
+        }
 
         if (termoBuscaGeral) {
             const termoLower = termoBuscaGeral.toLowerCase();
@@ -287,29 +279,20 @@ async function loadAndDisplayTarefas(filtroResponsavel = 'todos', termoBuscaGera
             });
         }
 
-        const naoConcluidas = tarefas.filter((e) => e.status == "pendente");
-        const concluidas = tarefas.filter((e) => e.status != "pendente");
         const andamentoTbody = document.getElementById('andamento');
-        const concluidoTbody = document.getElementById('concluido');
         andamentoTbody.innerHTML = '';
-        concluidoTbody.innerHTML = '';
 
-        const hoje = new Date();
-        const horas = hoje.getHours() + "" + hoje.getMinutes();
-        let mes = (parseInt(hoje.getMonth()) + 1).toString();
-        if (mes.length < 2) mes = "0" + mes;
-        const ano = hoje.getFullYear() + "" + mes + "" + hoje.getDate();
-    
-        naoConcluidas.forEach(tarefa => {
+        tarefas.forEach(tarefa => {
             const row = andamentoTbody.insertRow();
             row.insertCell().textContent = tarefa.acao;
             row.insertCell().textContent = tarefa.responsavel;
             row.insertCell().textContent = tarefa.urgencia;
-            row.insertCell().textContent =  new Date(tarefa.data).toLocaleDateString('pt-BR');
-            row.insertCell().textContent = tarefa.hora;
+            row.insertCell().textContent =  tarefa.data + " ás " + tarefa.hora;
 
             const entrega = tarefa.data + "T" + tarefa.hora + ":00";
+            console.log(entrega);
             const atraso = calcularDiferencaEntreDatas(new Date(entrega), new Date());
+
             if (atraso.dias > 0 || atraso.horas >= 0 || atraso.minutos >= 0) row.classList.add("vermelho");
             else if (atraso.dias == -1) row.classList.add("amarelo");
 
@@ -317,7 +300,7 @@ async function loadAndDisplayTarefas(filtroResponsavel = 'todos', termoBuscaGera
             const btnConclusao = document.createElement('button');
             btnConclusao.textContent = 'Concluir';
             btnConclusao.classList.add('complete-btn');
-            btnConclusao.onclick = () => {atualizarTarefa(tarefa.ID, tarefa.data, tarefa.hora)};
+            btnConclusao.onclick = () => {atualizarTarefa(tarefa.ID, entrega)};
             conclusao.appendChild(btnConclusao);
 
             const aviso = row.insertCell();
@@ -326,70 +309,150 @@ async function loadAndDisplayTarefas(filtroResponsavel = 'todos', termoBuscaGera
             btnAviso.onclick = () => {avisarTarefa(tarefa.responsavel, tarefa.acao, atraso)};
             aviso.appendChild(btnAviso);
         });
+    } catch (error) {
+        mostrarToast('Erro', 'Ao carregar e exibir tarefas em andamento: ' + error.message);
+    }
+}
 
-        concluidas.forEach(tarefa => {
+async function loadAndDisplayTarefasConcluido(filtroResponsavel = 'todos', termoBuscaGeral = '', page = 1, limit = itemsPerPage) {
+    try {
+        const response = await fetch(`http://localhost:3000/api/tarefas?status=concluido&_page=${page}&_limit=${limit}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        let tarefas = data.tarefas;
+        const totalTarefas = data.total;
+        const totalPages = Math.ceil(totalTarefas / itemsPerPage);
+
+        document.getElementById('currentPageConcluido').textContent = page;
+        document.getElementById('totalPagesConcluido').textContent = totalPages;
+        document.getElementById('prevPageConcluido').disabled = (page === 1);
+        document.getElementById('nextPageConcluido').disabled = (page === totalPages || totalPages === 0);
+
+        if (filtroResponsavel !== 'todos') tarefas = tarefas.filter(tarefa => tarefa.responsavel === filtroResponsavel);
+
+        if (termoBuscaGeral) {
+            const termoLower = termoBuscaGeral.toLowerCase();
+            tarefas = tarefas.filter(tarefa => {
+                return (
+                    tarefa.acao.toLowerCase().includes(termoLower) ||
+                    tarefa.responsavel.toLowerCase().includes(termoLower) ||
+                    tarefa.urgencia.toLowerCase().includes(termoLower) ||
+                    tarefa.data.toLowerCase().includes(termoLower) ||
+                    tarefa.hora.toLowerCase().includes(termoLower) ||
+                    tarefa.status.toLowerCase().includes(termoLower) // Include status in general search for completed tasks
+                );
+            });
+        }
+
+        const concluidoTbody = document.getElementById('concluido');
+        concluidoTbody.innerHTML = '';
+
+        tarefas.forEach(tarefa => {
             const row = concluidoTbody.insertRow();
             row.insertCell().textContent = tarefa.acao;
             row.insertCell().textContent = tarefa.responsavel;
             row.insertCell().textContent = tarefa.urgencia;
-            row.insertCell().textContent = tarefa.status;
+            row.insertCell().textContent = tarefa.atraso;
 
-            const actionCell = row.insertCell(); 
+            const actionCell = row.insertCell();
             const deleteButton = document.createElement('button');
             deleteButton.textContent = 'Deletar';
-            deleteButton.classList.add('delete-btn'); 
+            deleteButton.classList.add('delete-btn');
             deleteButton.onclick = () => {deletarTarefa(tarefa.ID)};
             actionCell.appendChild(deleteButton);
         });
     } catch (error) {
-        mostrarToast("'Erro", "Ao carregar e exibir rotas:', error.message");
+        mostrarToast('Erro', 'Ao carregar e exibir tarefas concluídas: ' + error.message);
     }
 }
 
+async function loadAndDisplayAllTarefas() {
+    const responsavelSelecionado = document.getElementById('filtroResponsavel').value;
+    const termoBuscaGeral = document.getElementById('filtroGeral').value;
+
+    await loadAndDisplayTarefasAndamento(responsavelSelecionado, termoBuscaGeral, currentPageAndamento, itemsPerPage);
+    await loadAndDisplayTarefasConcluido(responsavelSelecionado, termoBuscaGeral, currentPageConcluido, itemsPerPage);
+}
+
 document.addEventListener('DOMContentLoaded', async function() {
-    await loadAndDisplayTarefas('todos', '', currentPage, itemsPerPage);
     await loadFuncionariosIntoSelect();
+    await loadAndDisplayAllTarefas();
 
-    document.getElementById('prevPage').addEventListener('click', () => {
-        if (currentPage > 1) {
-            currentPage--;
-            loadAndDisplayTarefas(document.getElementById('filtroResponsavel').value, document.getElementById('filtroGeral').value, currentPage, itemsPerPage);
+    document.getElementById('prevPageAndamento').addEventListener('click', () => {
+        if (currentPageAndamento > 1) {
+            currentPageAndamento--;
+            loadAndDisplayTarefasAndamento(
+                document.getElementById('filtroResponsavel').value,
+                document.getElementById('filtroGeral').value,
+                currentPageAndamento,
+                itemsPerPage
+            );
         }
     });
 
-    document.getElementById('nextPage').addEventListener('click', () => {
-        const totalPages = parseInt(document.getElementById('totalPages').textContent);
-        if (currentPage < totalPages) {
-            currentPage++;
-            loadAndDisplayTarefas(document.getElementById('filtroResponsavel').value, document.getElementById('filtroGeral').value, currentPage, itemsPerPage);
+    document.getElementById('nextPageAndamento').addEventListener('click', () => {
+        const totalPages = parseInt(document.getElementById('totalPagesAndamento').textContent);
+        if (currentPageAndamento < totalPages) {
+            currentPageAndamento++;
+            loadAndDisplayTarefasAndamento(
+                document.getElementById('filtroResponsavel').value,
+                document.getElementById('filtroGeral').value,
+                currentPageAndamento,
+                itemsPerPage
+            );
         }
     });
+
+    document.getElementById('prevPageConcluido').addEventListener('click', () => {
+        if (currentPageConcluido > 1) {
+            currentPageConcluido--;
+            loadAndDisplayTarefasConcluido(
+                document.getElementById('filtroResponsavel').value,
+                document.getElementById('filtroGeral').value,
+                currentPageConcluido,
+                itemsPerPage
+            );
+        }
+    });
+
+    document.getElementById('nextPageConcluido').addEventListener('click', () => {
+        const totalPages = parseInt(document.getElementById('totalPagesConcluido').textContent);
+        if (currentPageConcluido < totalPages) {
+            currentPageConcluido++;
+            loadAndDisplayTarefasConcluido(
+                document.getElementById('filtroResponsavel').value,
+                document.getElementById('filtroGeral').value,
+                currentPageConcluido,
+                itemsPerPage
+            );
+        }
+    });
+
 
     // Event listener para o filtro de responsável
     const filtroResponsavelSelect = document.getElementById('filtroResponsavel');
     filtroResponsavelSelect.addEventListener('change', () => {
-        currentPage = 1; // Volta para a primeira página ao aplicar filtro
-        const responsavelSelecionado = filtroResponsavelSelect.value;
-        const termoBuscaGeral = document.getElementById('filtroGeral').value;
-        loadAndDisplayTarefas(responsavelSelecionado, termoBuscaGeral, currentPage, itemsPerPage);
+        currentPageAndamento = 1;
+        currentPageConcluido = 1;
+        loadAndDisplayAllTarefas();
     });
 
     // Event listener para o filtro de busca geral (digitação)
     const filtroGeralInput = document.getElementById('filtroGeral');
     filtroGeralInput.addEventListener('keyup', () => {
-        currentPage = 1; // Volta para a primeira página ao aplicar filtro
-        const responsavelSelecionado = document.getElementById('filtroResponsavel').value;
-        const termoBuscaGeral = filtroGeralInput.value;
-        loadAndDisplayTarefas(responsavelSelecionado, termoBuscaGeral, currentPage, itemsPerPage);
+        currentPageAndamento = 1;
+        currentPageConcluido = 1;
+        loadAndDisplayAllTarefas();
     });
 
     // Event listener para o botão de limpar filtro
     const limparFiltroButton = document.getElementById('limparFiltro');
     limparFiltroButton.addEventListener('click', () => {
-        currentPage = 1; // Volta para a primeira página ao limpar filtro
+        currentPageAndamento = 1;
+        currentPageConcluido = 1;
         filtroResponsavelSelect.value = 'todos';
         filtroGeralInput.value = '';
-        loadAndDisplayTarefas('todos', '', currentPage, itemsPerPage);
+        loadAndDisplayAllTarefas();
     });
 
     //Event Listener para o botãp de adicionar tarefa

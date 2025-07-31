@@ -15,7 +15,7 @@ app.use(cors());
 
 const transportador = nodemailer.createTransport({
     service: 'gmail',
-    auth: {user: '', pass: '',}, // Substituir
+    auth: {user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS,},
 });
 
 const db = new sqlite3.Database('./public/banco.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
@@ -30,7 +30,8 @@ const db = new sqlite3.Database('./public/banco.db', sqlite3.OPEN_READWRITE | sq
             urgencia TEXT,
             data TEXT,
             hora TEXT,
-            status Text
+            status Text,
+            atraso Text
         )`, (createErr) => {
             if (createErr) console.error('Erro ao criar tabela tarefas:', createErr.message);
             else console.log('Tabela "tarefas" verificada/criada.');
@@ -48,29 +49,39 @@ const db = new sqlite3.Database('./public/banco.db', sqlite3.OPEN_READWRITE | sq
 app.use(express.json());
 
 app.use(express.static(path.join(__dirname, 'public'), {
-    maxAge: '1h', 
+    maxAge: '1h',
     setHeaders: function (res, path, stat) {
         res.removeHeader('X-XSS-Protection');
         res.removeHeader('X-Frame-Options');
     }
 }));
 
-// ...
 app.get('/api/tarefas', (req, res) => {
-    const page = parseInt(req.query._page) || 1; // Página padrão é 1
-    const limit = parseInt(req.query._limit) || 10; // Limite padrão de 10 itens por página
-    const offset = (page - 1) * limit; // Calcular o offset
+    const page = parseInt(req.query._page) || 1;
+    const limit = parseInt(req.query._limit) || 10;
+    const statusFilter = req.query.status || null; // New: Get status filter
+    const offset = (page - 1) * limit;
 
-    // Primeiro, conte o total de tarefas para calcular o total de páginas
-    db.get('SELECT COUNT(*) AS total FROM tarefas', [], (err, countRow) => {
+    let countSql = 'SELECT COUNT(*) AS total FROM tarefas';
+    let selectSql = 'SELECT *, ID AS ID FROM tarefas';
+    const params = [];
+
+    if (statusFilter) {
+        countSql += ' WHERE status = ?';
+        selectSql += ' WHERE status = ?';
+        params.push(statusFilter);
+    }
+
+    // First, count the total tasks for the filtered status
+    db.get(countSql, params, (err, countRow) => { // Use params for count query
         if (err) {
             res.status(500).json({ error: err.message });
             return;
         }
         const totalTarefas = countRow.total;
 
-        // Em seguida, selecione as tarefas para a página atual
-        db.all('SELECT *, ID AS ID FROM tarefas LIMIT ? OFFSET ?', [limit, offset], (err, rows) => {
+        // Then, select the tasks for the current page
+        db.all(selectSql + ' LIMIT ? OFFSET ?', [...params, limit, offset], (err, rows) => { // Use params for select query
             if (err) {
                 res.status(500).json({ error: err.message });
                 return;
@@ -79,7 +90,6 @@ app.get('/api/tarefas', (req, res) => {
         });
     });
 });
-// ...
 
 app.get('/api/funcionarios', (req, res) => {
     db.all('SELECT *, ID AS ID FROM funcionarios', [], (err, rows) => {
@@ -91,7 +101,6 @@ app.get('/api/funcionarios', (req, res) => {
     });
 });
 
-// Dentro do seu app.js, adicione esta nova rota GET
 app.get('/api/funcionarios/email/:nome', (req, res) => {
     const nomeFuncionario = req.params.nome;
 
@@ -107,16 +116,16 @@ app.get('/api/funcionarios/email/:nome', (req, res) => {
 });
 
 app.post('/api/tarefas', (req, res) => {
-    const {acao, responsavel, urgencia, data, hora, status} = req.body;
+    const {acao, responsavel, urgencia, data, hora, status, atraso} = req.body;
 
-    if (!acao || !responsavel || !urgencia || !data || !hora || !status) {
+    if (!acao || !responsavel || !urgencia || !data || !hora || !status || !atraso) {
         console.warn('Requisição com campos obrigatórios ausentes:', req.body);
-        return res.status(400).json({ error: 'Campos obrigatórios (acao, responsavel, urgencia, data, hora, status) ausentes.' });
+        return res.status(400).json({ error: 'Campos obrigatórios (acao, responsavel, urgencia, data, hora, status, atraso) ausentes.' });
     }
 
-    const sql = `INSERT INTO tarefas (acao, responsavel, urgencia, data, hora, status) VALUES (?, ?, ?, ?, ?, ?)`;
+    const sql = `INSERT INTO tarefas (acao, responsavel, urgencia, data, hora, status, atraso) VALUES (?, ?, ?, ?, ?, ?, ?)`;
 
-    db.run(sql, [acao, responsavel, urgencia, data, hora, status], function(err) {
+    db.run(sql, [acao, responsavel, urgencia, data, hora, status, atraso], function(err) {
         if (err) {
             console.error('ERRO ao adicionar tarefa no DB:', err.message, 'Dados:', req.body);
             res.status(500).json({ error: err.message });
@@ -126,7 +135,6 @@ app.post('/api/tarefas', (req, res) => {
     });
 });
 
-// app.js
 app.post('/api/funcionarios', (req, res) => {
     const {nome, email} = req.body;
 
@@ -135,18 +143,16 @@ app.post('/api/funcionarios', (req, res) => {
         return res.status(400).json({ error: 'Campos obrigatórios (nome, email) ausentes.' });
     }
 
-    //Verifique se o email já existe
     db.get('SELECT COUNT(*) AS count FROM funcionarios WHERE email = ?', [email], (err, row) => {
         if (err) {
             console.error('ERRO ao verificar email de funcionário no DB:', err.message);
             return res.status(500).json({ error: err.message });
         }
 
-        if (row.count > 0) { // Email já existe, retorne um erro 409 Conflict
+        if (row.count > 0) {
             return res.status(409).json({ error: 'Já existe um funcionário cadastrado com este e-mail.' });
         }
 
-        // Se o email não existe, proceda com a inserção
         const sql = `INSERT INTO funcionarios (nome, email) VALUES (?, ?)`;
 
         db.run(sql, [nome, email], function(err) {
@@ -162,11 +168,11 @@ app.post('/api/funcionarios', (req, res) => {
 
 app.put('/api/tarefas/:id', (req, res) => {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status, atraso } = req.body;
 
-    if (!status) return res.status(400).json({ error: 'Campo "status" ausente.' });
+    if (!status || !atraso) return res.status(400).json({ error: 'Um ou mais campos ausentes.' });
 
-    db.run(`UPDATE tarefas SET status = ? WHERE ID = ?`, [status, id], function(err) {
+    db.run(`UPDATE tarefas SET status = ?, atraso = ? WHERE ID = ?`, [status, atraso, id], function(err) {
         if (err) {
             console.error('ERRO ao atualizar status da tarefa no DB:');
             res.status(500).json({ error: err.message });
@@ -195,7 +201,7 @@ app.post('/enviar-email', async (req, res) => {
 
     if (!destinatario || !assunto || !corpo) return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
 
-    const opcoesDeEmail = {from: '', to: destinatario, subject: assunto, text: corpo,};
+    const opcoesDeEmail = {from: process.env.EMAIL_USER, to: destinatario, subject: assunto, text: corpo,};
 
     try {
         await transportador.sendMail(opcoesDeEmail);

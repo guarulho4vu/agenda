@@ -15,7 +15,7 @@
 
         <img src="./img/agenda.png" alt="agenda" width="120px" height="120px" id="img1"/>
         <img src="./img/agenda.png" alt="agenda" width="120px" height="120px" id="img2"/>
-        
+
         <div id="myToast" class="toast-container">
             <div class="toast-title" id="toastTitle"></div>
             <div class="toast-message" id="toastMessage"></div>
@@ -35,10 +35,10 @@
                         <label for="responsavel">Responsável:</label>
                         <select id="responsavel" title="Selecione o responsável pela tarefa"><option value="todos" >Todos os Responsáveis</option></select>
                     </div>
-                    
+
                     <div class="flex">
                         <label for="urgencia">Prioridade:</label>
-                        <select name="prioridade" id="urgencia" title="Selecione a prioridade da tarefa"> 
+                        <select name="prioridade" id="urgencia" title="Selecione a prioridade da tarefa">
                             <option value="Baixa" class="opcao">Baixa</option>
                             <option value="Media" class="opcao">Média</option>
                             <option value="Alta" class="opcao">Alta</option>
@@ -71,11 +71,11 @@
                         <label for="email" autocomplete="name">Email:</label>
                         <input type="email" id="email" placeholder="funcionario@gmail.com" required autocomplete="email"/>
                     </div>
-                    
+
                     <input type="submit" id="submitFuncionario" class="submit">
                 </form>
             </div>
-            
+
             <div class="separacao">
                 <div class="entrada">
                     <h2>Filtrar Tarefas:</h2>
@@ -83,7 +83,7 @@
                         <label for="filtroResponsavel">Responsável:</label>
                         <select id="filtroResponsavel" title="Filtrar por responsável"><option value="todos">Todos os Responsáveis</option></select>
                     </div>
-                    
+
                     <div class="flex">
                         <label for="filtroGeral">Geral:</label>
                         <input type="text" id="filtroGeral" placeholder="Filtrar por Ação, Responsável, Prioridade, Data ou Hora">
@@ -102,18 +102,17 @@
                             <th>Tarefa</th>
                             <th>Responsável</th>
                             <th>Prioridade</th>
-                            <th>Dia</th>
-                            <th>Hora</th>
+                            <th>Data</th>
                             <th>Concluir</th>
                             <th>Avisar</th>
                         </tr>
                     </thead>
                     <tbody id="andamento"></tbody>
                 </table>
-                <div class="paginacao">
-                    <button id="prevPage">Anterior</button>
-                    <span id="currentPage">1</span> / <span id="totalPages">1</span>
-                    <button id="nextPage">Próximo</button>
+                 <div class="paginacao">
+                    <button id="prevPageAndamento">Anterior</button>
+                    <span id="currentPageAndamento">1</span> / <span id="totalPagesAndamento">1</span>
+                    <button id="nextPageAndamento">Próximo</button>
                 </div>
             </div>
 
@@ -126,11 +125,16 @@
                             <th>Responsável</th>
                             <th>Prioridade</th>
                             <th>Status</th>
-                            <th>Ações</th> 
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody id="concluido"></tbody>
                 </table>
+                <div class="paginacao">
+                    <button id="prevPageConcluido">Anterior</button>
+                    <span id="currentPageConcluido">1</span> / <span id="totalPagesConcluido">1</span>
+                    <button id="nextPageConcluido">Próximo</button>
+                </div>
             </div>
         </div>
         <script src="script.js?v=20250723"></script>

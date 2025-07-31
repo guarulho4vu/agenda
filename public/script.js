@@ -4,7 +4,7 @@ const itemsPerPage = 10;
 
 async function adicionarAPI(novaTarefa, tipo) { // faz uma requisição para adicionar tarefas ou funcionário
     try {
-        const response = await fetch('http://localhost:3000/api/' + tipo, {
+        const response = await fetch('/api/' + tipo, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(novaTarefa)
@@ -21,7 +21,7 @@ async function adicionarAPI(novaTarefa, tipo) { // faz uma requisição para adi
 
 async function atualizarTarefaAPI(id, tarefa) { // faz a requisição para finalizar uma tarefa
     try {
-        const response = await fetch(`http://localhost:3000/api/tarefas/${id}`, {
+        const response = await fetch(`/api/tarefas/${id}`, {
             method: 'PUT',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(tarefa)
@@ -38,7 +38,7 @@ async function atualizarTarefaAPI(id, tarefa) { // faz a requisição para final
 
 async function deletarTarefaAPI(id) { // faz a requisição para deletar uma tarefa
     try {
-        const response = await fetch(`http://localhost:3000/api/tarefas/${id}`, {method: 'DELETE'});
+        const response = await fetch(`api/tarefas/${id}`, {method: 'DELETE'});
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || 'Erro desconhecido ao deletar rota.');
         return result;
@@ -50,7 +50,7 @@ async function deletarTarefaAPI(id) { // faz a requisição para deletar uma tar
 
 async function conseguindoEmail(nome) { //obtém o email do funcionario no banco de dados
     try {
-        const response = await fetch(`http://localhost:3000/api/funcionarios/email/${encodeURIComponent(nome)}`); // encodeURIComponent é importante para nomes com espaços ou caracteres especiais
+        const response = await fetch(`/api/funcionarios/email/${encodeURIComponent(nome)}`);
         if (!response.ok) {
             if (response.status === 404) {
                 console.warn(`Funcionário com nome "${nome}" não encontrado.`);
@@ -222,7 +222,7 @@ async function avisarTarefa(responsavel, tarefa, atraso) { // gera um email de a
 
 async function loadFuncionariosIntoSelect() { // carrega a seleção de funcionários
     try {
-        const response = await fetch('http://localhost:3000/api/funcionarios');
+        const response = await fetch('/api/funcionarios');
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         const funcionarios = data.funcionarios;
@@ -250,7 +250,7 @@ async function loadFuncionariosIntoSelect() { // carrega a seleção de funcion�
 
 async function loadAndDisplayTarefasAndamento(filtroResponsavel = 'todos', termoBuscaGeral = '', page = 1, limit = itemsPerPage) {
     try {
-        const response = await fetch(`http://localhost:3000/api/tarefas?status=pendente&_page=${page}&_limit=${limit}`);
+        const response = await fetch(`/api/tarefas?status=pendente&_page=${page}&_limit=${limit}`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         let tarefas = data.tarefas;
@@ -316,7 +316,7 @@ async function loadAndDisplayTarefasAndamento(filtroResponsavel = 'todos', termo
 
 async function loadAndDisplayTarefasConcluido(filtroResponsavel = 'todos', termoBuscaGeral = '', page = 1, limit = itemsPerPage) {
     try {
-        const response = await fetch(`http://localhost:3000/api/tarefas?status=concluido&_page=${page}&_limit=${limit}`);
+        const response = await fetch(`/api/tarefas?status=concluido&_page=${page}&_limit=${limit}`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         let tarefas = data.tarefas;

@@ -15,7 +15,7 @@ app.use(cors());
 
 const transportador = nodemailer.createTransport({
     service: 'gmail',
-    auth: {user: EMAIL_USER, pass: EMAIL_PASS,},
+    auth: {user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS,},
 });
 
 const db = new sqlite3.Database('./public/banco.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
@@ -201,7 +201,7 @@ app.post('/enviar-email', async (req, res) => {
 
     if (!destinatario || !assunto || !corpo) return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
 
-    const opcoesDeEmail = {from: EMAIL_USER, to: destinatario, subject: assunto, text: corpo,};
+    const opcoesDeEmail = {from: process.env.EMAIL_USER, to: destinatario, subject: assunto, text: corpo,};
 
     try {
         await transportador.sendMail(opcoesDeEmail);

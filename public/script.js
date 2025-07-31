@@ -298,13 +298,14 @@ async function loadAndDisplayTarefasAndamento(filtroResponsavel = 'todos', termo
             const conclusao = row.insertCell();
             const btnConclusao = document.createElement('button');
             btnConclusao.textContent = 'Concluir';
-            btnConclusao.classList.add('complete-btn');
+            btnConclusao.classList.add('btn');
             btnConclusao.onclick = () => {atualizarTarefa(tarefa.ID, entrega)};
             conclusao.appendChild(btnConclusao);
 
             const aviso = row.insertCell();
             const btnAviso = document.createElement('button');
             btnAviso.textContent = 'Avisar';
+            btnConclusao.classList.add('btn');
             btnAviso.onclick = () => {avisarTarefa(tarefa.responsavel, tarefa.acao, atraso)};
             aviso.appendChild(btnAviso);
         });
@@ -356,7 +357,7 @@ async function loadAndDisplayTarefasConcluido(filtroResponsavel = 'todos', termo
             const actionCell = row.insertCell();
             const deleteButton = document.createElement('button');
             deleteButton.textContent = 'Deletar';
-            deleteButton.classList.add('delete-btn');
+            deleteButton.classList.add('btn');
             deleteButton.onclick = () => {deletarTarefa(tarefa.ID)};
             actionCell.appendChild(deleteButton);
         });

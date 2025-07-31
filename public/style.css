@@ -129,7 +129,7 @@ input, select {
     background-color: #ffe3db;
 }
 
-.dados-banco tbody tr:hover, .submit:hover, #limparFiltro:hover, .paginacao button:hover {
+.btn:hover, .submit:hover, #limparFiltro:hover, .paginacao button:hover {
     background-color: #5f50e5;
 }
 

@@ -305,7 +305,7 @@ async function loadAndDisplayTarefasAndamento(filtroResponsavel = 'todos', termo
             const aviso = row.insertCell();
             const btnAviso = document.createElement('button');
             btnAviso.textContent = 'Avisar';
-            btnConclusao.classList.add('btn');
+            btnAviso.classList.add('btn');
             btnAviso.onclick = () => {avisarTarefa(tarefa.responsavel, tarefa.acao, atraso)};
             aviso.appendChild(btnAviso);
         });

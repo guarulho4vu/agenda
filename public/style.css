@@ -129,8 +129,12 @@ input, select {
     background-color: #ffe3db;
 }
 
+.dados-banco tbody tr:hover  {
+    filter: grayscale(45%);
+}
+
 .btn:hover, .submit:hover, #limparFiltro:hover, .paginacao button:hover {
-    background-color: #5f50e5;
+    background-color: #db7052;
 }
 
 .toast-container {
@@ -138,7 +142,7 @@ input, select {
     top: 20px;
     right: -350px;
     width: 300px; 
-    background-color: #4c7faf; 
+    background-color: #f55c32; 
     color: white;
     padding: 15px;
     border-radius: 8px;
@@ -196,7 +200,7 @@ input, select {
     gap: 15px;
 }
 
-.paginacao button {
+.paginacao button, .btn {
     background-color: #fe8260;
     color: white;
     border: none;

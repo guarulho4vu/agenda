@@ -13,11 +13,13 @@ const __dirname = path.dirname(__filename);
 
 app.use(cors());
 
+// conecta ao email
 const transportador = nodemailer.createTransport({
     service: 'gmail',
     auth: {user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS,},
 });
 
+//cria o banco de dados, se ele não existe
 const db = new sqlite3.Database('./public/banco.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
     if (err) {
         console.error('Erro ao abrir o banco de dados:', err.message);
@@ -56,6 +58,7 @@ app.use(express.static(path.join(__dirname, 'public'), {
     }
 }));
 
+// envia ás tarefas
 app.get('/api/tarefas', (req, res) => {
     const page = parseInt(req.query._page) || 1;
     const limit = parseInt(req.query._limit) || 10;
@@ -91,6 +94,7 @@ app.get('/api/tarefas', (req, res) => {
     });
 });
 
+// retorna os funcionários existentes
 app.get('/api/funcionarios', (req, res) => {
     db.all('SELECT *, ID AS ID FROM funcionarios', [], (err, rows) => {
         if (err) {
@@ -101,6 +105,7 @@ app.get('/api/funcionarios', (req, res) => {
     });
 });
 
+// retorna o email de um funcionário especifíco
 app.get('/api/funcionarios/email/:nome', (req, res) => {
     const nomeFuncionario = req.params.nome;
 
@@ -115,6 +120,7 @@ app.get('/api/funcionarios/email/:nome', (req, res) => {
     });
 });
 
+// adiciona uma tarefa
 app.post('/api/tarefas', (req, res) => {
     const {acao, responsavel, urgencia, data, hora, status, atraso} = req.body;
 
@@ -135,6 +141,7 @@ app.post('/api/tarefas', (req, res) => {
     });
 });
 
+// adiciona um funcionário
 app.post('/api/funcionarios', (req, res) => {
     const {nome, email} = req.body;
 
@@ -166,6 +173,7 @@ app.post('/api/funcionarios', (req, res) => {
     });
 });
 
+// conclui uma tarefa
 app.put('/api/tarefas/:id', (req, res) => {
     const { id } = req.params;
     const { status, atraso } = req.body;
@@ -183,6 +191,7 @@ app.put('/api/tarefas/:id', (req, res) => {
     });
 });
 
+// apaga uma tarefa específica
 app.delete('/api/tarefas/:id', (req, res) => {
     const { id } = req.params;
     db.run('DELETE FROM tarefas WHERE ID = ?', id, function(err) {
@@ -196,6 +205,7 @@ app.delete('/api/tarefas/:id', (req, res) => {
     });
 });
 
+// manda um email para o funcionário
 app.post('/enviar-email', async (req, res) => {
     const { destinatario, assunto, corpo } = req.body;
 
@@ -213,15 +223,18 @@ app.post('/enviar-email', async (req, res) => {
     }
 });
 
+// recebe o caminho
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'main.html'));
 });
 
+// inicia o servidor
 app.listen(port, () => {
     console.log(`Servidor rodando em http://localhost:${port}`);
     console.log(`Abra http://localhost:${port}/main.html no seu navegador.`);
 });
 
+// encerra o servidor ao fechar a aplicação
 process.on('SIGINT', () => {
     db.close((err) => {
         if (err) console.error(err.message);

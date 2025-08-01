@@ -132,7 +132,7 @@ async function addFuncionario() { // adiciona um novo Funcionário
     }
 }
 
-function calcularDiferencaEntreDatas(dataInicial, dataFinal) {
+function calcularDiferencaEntreDatas(dataInicial, dataFinal) { //calcula o atraso
     const msPorMinuto = 60 * 1000;
     const msPorHora = 60 * msPorMinuto;
     const msPorDia = 24 * msPorHora;
@@ -248,7 +248,7 @@ async function loadFuncionariosIntoSelect() { // carrega a seleção de funcion�
     }
 }
 
-async function loadAndDisplayTarefasAndamento(filtroResponsavel = 'todos', termoBuscaGeral = '', page = 1, limit = itemsPerPage) {
+async function loadAndDisplayTarefasAndamento(filtroResponsavel = 'todos', termoBuscaGeral = '', page = 1, limit = itemsPerPage) { // adiciona a tabela andamento
     try {
         const response = await fetch(`/api/tarefas?status=pendente&_page=${page}&_limit=${limit}`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -314,7 +314,7 @@ async function loadAndDisplayTarefasAndamento(filtroResponsavel = 'todos', termo
     }
 }
 
-async function loadAndDisplayTarefasConcluido(filtroResponsavel = 'todos', termoBuscaGeral = '', page = 1, limit = itemsPerPage) {
+async function loadAndDisplayTarefasConcluido(filtroResponsavel = 'todos', termoBuscaGeral = '', page = 1, limit = itemsPerPage) { //adiciona a tabela concluidos
     try {
         const response = await fetch(`/api/tarefas?status=concluido&_page=${page}&_limit=${limit}`);
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -366,7 +366,7 @@ async function loadAndDisplayTarefasConcluido(filtroResponsavel = 'todos', termo
     }
 }
 
-async function loadAndDisplayAllTarefas() {
+async function loadAndDisplayAllTarefas() { // carrega as tarefas para as tabelas
     const responsavelSelecionado = document.getElementById('filtroResponsavel').value;
     const termoBuscaGeral = document.getElementById('filtroGeral').value;
 
@@ -427,7 +427,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             );
         }
     });
-
 
     // Event listener para o filtro de responsável
     const filtroResponsavelSelect = document.getElementById('filtroResponsavel');

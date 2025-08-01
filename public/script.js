@@ -1,6 +1,7 @@
+const itemsPerPage = 10;
 let currentPageAndamento = 1;
 let currentPageConcluido = 1;
-const itemsPerPage = 10;
+let modalCallback = null;
 
 async function adicionarAPI(novaTarefa, tipo) { // faz uma requisição para adicionar tarefas ou funcionário
     try {
@@ -177,31 +178,61 @@ function mostrarToast(title, message) { // gera a msg toast
     }, 5000);
 }
 
-async function atualizarTarefa(id, entrega) {// faz a requisição para atualizar uma tarefa
-    if (confirm('Tem certeza que deseja concluir esta tarefa?')) {
-        let resultado = "Sem atraso";
-        const atraso = calcularDiferencaEntreDatas(new Date(entrega), new Date());
-        if (atraso.dias >= 0) resultado = "Atraso de " + atraso.dias + " dias, " + atraso.horas + " horas e " + atraso.minutos + " minutos.";
-        try {
-            await atualizarTarefaAPI(id, { status : 'concluido', atraso : resultado });
-            await loadAndDisplayAllTarefas(); // Load both sections
-            mostrarToast("Sucesso", "Tarefa concluída com sucesso!");
-        } catch (error) {
-            mostrarToast("Erro", 'Ao atualizar status da tarefa: ' + error.message);
-        }
+function confirmarModal(message, callback) {
+    const modal = document.getElementById('confirmationModal');
+    const modalMessage = document.getElementById('modalMessage');
+    const confirmarBtn = document.getElementById('confirmarBtn');
+    const cancelarBtn = document.getElementById('cancelarBtn');
+    const fecharBtn = document.querySelector('.fecharBtn');
+
+    modalMessage.textContent = message;
+    modal.style.display = 'flex';
+    modalCallback = callback;
+
+    confirmarBtn.onclick = null;
+    cancelarBtn.onclick = null;
+    fecharBtn.onclick = null;
+   
+    const retornarResultado = (resultado) => {
+        modal.style.display = 'none';
+        if (modalCallback) modalCallback(resultado);
     }
+
+    confirmarBtn.onclick = () => retornarResultado(true);
+    cancelarBtn.onclick = () => retornarResultado(false);
+    fecharBtn.onclick = () => retornarResultado(false);
+    window.onclick = (event) => {if (event.target === modal) retornarResultado(false);};
 }
 
-async function deletarTarefa(id) {// faz a requisição para deletar uma tarefa
-    if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
-        try {
-            await deletarTarefaAPI(id);
-            await loadAndDisplayAllTarefas(); // Load both sections
-            mostrarToast("Sucesso", 'Tarefa excluída com sucesso!');
-        } catch (error) {
-            mostrarToast('Erro', 'Ao excluir tarefa: ' + error.message);
+async function atualizarTarefa(id, entrega) {
+    confirmarModal('Tem certeza que deseja concluir esta tarefa?', async (confirmed) => {
+        if (confirmed) {
+            let resultado = "Sem atraso";
+            const atraso = calcularDiferencaEntreDatas(new Date(entrega), new Date());
+            if (atraso.dias >= 0) resultado = "Atraso de " + atraso.dias + " dias, " + atraso.horas + " horas e " + atraso.minutos + " minutos.";
+            try {
+                await atualizarTarefaAPI(id, { status : 'concluido', atraso : resultado });
+                await loadAndDisplayAllTarefas(); // Load both sections
+                mostrarToast("Sucesso", "Tarefa concluída com sucesso!");
+            } catch (error) {
+                mostrarToast("Erro", 'Ao atualizar status da tarefa: ' + error.message);
+            }
         }
-    }
+    });
+}
+
+async function deletarTarefa(id) {
+    confirmarModal('Tem certeza que deseja excluir esta tarefa?', async (confirmed) => {
+        if (confirmed) {
+            try {
+                await deletarTarefaAPI(id);
+                await loadAndDisplayAllTarefas(); // Load both sections
+                mostrarToast("Sucesso", 'Tarefa excluída com sucesso!');
+            } catch (error) {
+                mostrarToast('Erro', 'Ao excluir tarefa: ' + error.message);
+            }
+        }
+    });
 }
 
 async function avisarTarefa(responsavel, tarefa, atraso) { // gera um email de aviso

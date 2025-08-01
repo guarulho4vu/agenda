@@ -96,18 +96,20 @@
             <div class="separacao">
                 <h2>Tarefas em andamento</h2>
                 <p>Glossário:⚫-Normal, 🟡-Próximo ao vencimento, 🔴-Atrasado</p>
-                <table class="dados-banco">
-                    <thead>
-                        <tr>
-                            <th>Tarefa</th>
-                            <th>Responsável</th>
-                            <th>Data</th>
-                            <th>Concluir</th>
-                            <th>Avisar</th>
-                        </tr>
-                    </thead>
-                    <tbody id="andamento"></tbody>
-                </table>
+                <div class="tabela-responsiva">
+                    <table class="dados-banco">
+                        <thead>
+                            <tr>
+                                <th>Tarefa</th>
+                                <th>Responsável</th>
+                                <th>Data</th>
+                                <th>Concluir</th>
+                                <th>Avisar</th>
+                            </tr>
+                        </thead>
+                        <tbody id="andamento"></tbody>
+                    </table>
+                </div>
                  <div class="paginacao">
                     <button id="prevPageAndamento" class="btn">Anterior</button>
                     <span id="currentPageAndamento">1</span> / <span id="totalPagesAndamento">1</span>
@@ -117,18 +119,20 @@
 
             <div class="separacao">
                 <h2>Tarefas Concluidas</h2>
-                <table class="dados-banco">
-                    <thead>
-                        <tr>
-                            <th>Tarefa</th>
-                            <th>Responsável</th>
-                            <th>Prioridade</th>
-                            <th>Status</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="concluido"></tbody>
-                </table>
+                <div class="tabela-responsiva">
+                    <table class="dados-banco">
+                        <thead>
+                            <tr>
+                                <th>Tarefa</th>
+                                <th>Responsável</th>
+                                <th>Prioridade</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="concluido"></tbody>
+                    </table>
+                </div>
                 <div class="paginacao">
                     <button id="prevPageConcluido" class="btn">Anterior</button>
                     <span id="currentPageConcluido">1</span> / <span id="totalPagesConcluido">1</span>

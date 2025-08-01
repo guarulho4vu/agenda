@@ -93,6 +93,11 @@ input, select {
     font-size: 16px;
 }
 
+.tabela-responsiva {
+    overflow-x: auto; 
+    -webkit-overflow-scrolling: touch;
+}
+
 .dados-banco {
     width: 100%; 
     border-collapse: collapse;
@@ -101,9 +106,6 @@ input, select {
 }
 
 @media (max-width: 620px) {
-    .dados-banco {
-        font-size: 75%;
-    }
     img {
         display: none;
     }
